@@ -1,0 +1,11 @@
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\bin\Debug\Telemetry_System.exe.config
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\bin\Debug\Telemetry_System.exe
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\bin\Debug\Telemetry_System.pdb
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.csprojResolveAssemblyReference.cache
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.Properties.Resources.resources
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.csproj.GenerateResource.Cache
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.exe
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.pdb
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.Main_Menu.resources
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.Serial_Monitor.resources
+C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.MainScreen.resources
