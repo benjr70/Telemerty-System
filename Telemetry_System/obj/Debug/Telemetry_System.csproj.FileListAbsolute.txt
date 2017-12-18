@@ -9,3 +9,15 @@ C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_Syste
 C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.Main_Menu.resources
 C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.Serial_Monitor.resources
 C:\Users\Ben\Desktop\Telemetry_System\Telemetry_System\obj\Debug\Telemetry_System.MainScreen.resources
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.csprojResolveAssemblyReference.cache
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.Main_Menu.resources
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.MainScreen.resources
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.Properties.Resources.resources
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.Serial_Monitor.resources
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.csproj.GenerateResource.Cache
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.csproj.CoreCompileInputs.cache
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.exe
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.pdb
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\bin\Debug\Telemetry_System.exe.config
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\bin\Debug\Telemetry_System.exe
+C:\Users\benro\Desktop\Telemerty-System\Telemetry_System\bin\Debug\Telemetry_System.pdb

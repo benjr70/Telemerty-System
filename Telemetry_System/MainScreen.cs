@@ -22,49 +22,50 @@ namespace Telemetry_System
   
     public partial class MainScreen : Form
     {
-        SerialPort myPort;
+        SerialPort myport;
         inputdata data = new inputdata();
+        string in_data;
         public MainScreen(SerialPort port)
         {
             InitializeComponent();
-            myPort = port;
-            myPort.Open();
-            lineParse();
+            myport = port;
+            myport.DataReceived += myport_DataReceived;
+            myport.Open();
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             //this.Hide();
-            myPort.Close();
-            Serial_Monitor SerialMonitor = new Serial_Monitor(myPort);
+            //myport.Close();
+            Serial_Monitor SerialMonitor = new Serial_Monitor(myport);
             SerialMonitor.Show();
         }
 
-        private void lineParse()
-        {
-            int index = 0;
-            string line = myPort.ReadLine();
-            string temp = "";
-            int x = 0;
-            int[] data;
-            int dataindex = 0;
-            while(line[index] != '\0')
-            {
-                x = 0;
-                while(line[index] != '\t')
-                {
-                    temp[x] = line[index];
-                    x++;
-                    index++;
-                }
-                data[dataindex] = Convert.ToInt32(temp);
-                dataindex++;
-                temp = "";
-                index++;
 
+        void myport_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+
+            in_data = myport.ReadLine();
+            try
+            {
+                this.Invoke(new EventHandler(displaydata_event));
+            }
+            catch (Exception ex)
+            {
+                // MessageBox.Show(ex.Message, "Error");
+                myport.Close();
             }
 
         }
+
+        private void displaydata_event(object sender, EventArgs e)
+        {
+        
+        
+        
+        }
+       
 
     }
 }
