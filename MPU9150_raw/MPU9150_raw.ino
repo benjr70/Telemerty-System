@@ -52,7 +52,7 @@ int16_t mx, my, mz;
 #define LED_PIN 13
 bool blinkState = false;
 
-volatile unsigned int counter = 0; // for rotary encoder
+int counter = 0; // for rotary encoder
 
 //****************************
 #include <SPI.h>
@@ -143,7 +143,10 @@ void loop() {
     float mag = mx*mx/N + my*my/N + mz*mz/N;
 
   if(counter >2000){
-    counter = 0;
+    counter = 1;
+  }
+  if(counter < 0){
+    counter = 1999;
   }
     Serial.println (counter);
     data[0] = counter;
@@ -156,7 +159,7 @@ void loop() {
     data[7] = mx;
     data[8] = my;
     data[9] = mz;
-    data[10] = mag;
+   // data[10] = mag;
 
   radio.writeFast(&data,32);
     

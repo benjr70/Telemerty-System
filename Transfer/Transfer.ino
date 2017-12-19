@@ -111,17 +111,18 @@ if(role == RX){
       counter++;
      }
      delay(50);
-     Serial.print(data[0]);  Serial.print("\t");
-     Serial.print(data[1]); Serial.print("\t"); 
-     Serial.print(data[2]); Serial.print("\t");
-     Serial.print(data[3]); Serial.print("\t");
-     Serial.print(data[4]); Serial.print("\t");
-     Serial.print(data[5]); Serial.print("\t");
-     Serial.print(data[6]); Serial.print("\t");
-     Serial.print(data[7]); Serial.print("\t");
-     Serial.print(data[8]); Serial.print("\t");
-     Serial.print(data[9]); Serial.print("\t");
-     Serial.print(data[10]); Serial.println("\t");
+     Serial.print(data[0]);  Serial.print("--");
+     Serial.print(data[1]); Serial.print("--"); 
+     Serial.print(data[2]); Serial.print("--");
+     Serial.print(data[3]); Serial.print("--");
+     Serial.print(data[4]); Serial.print("--");
+     Serial.print(data[5]); Serial.print("--");
+     Serial.print(data[6]); Serial.print("--");
+     Serial.print(data[7]); Serial.print("--");
+     Serial.print(data[8]); Serial.print("--");
+     Serial.print(data[9]); Serial.print("--");
+     Serial.println("E");
+   //  Serial.print(data[10]); Serial.println("\t");
      /*
    if(millis() - rxTimer > 1000){
      rxTimer = millis();     

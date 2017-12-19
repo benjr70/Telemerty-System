@@ -28,13 +28,14 @@ namespace Telemetry_System
          void myport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
 
-            in_data = myport.ReadLine();
+            
             try {
+                in_data = myport.ReadLine();
                 this.Invoke(new EventHandler(displaydata_event));
             }
             catch(Exception ex) {
                 //MessageBox.Show(ex.Message, "Error");
-              //  myport.Close();
+               // myport.Close();
             }
 
         }
