@@ -33,6 +33,7 @@
             this.Port_name = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.baudrate = new System.Windows.Forms.TextBox();
+            this.Disconnect = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -79,11 +80,22 @@
             this.baudrate.TabIndex = 5;
             this.baudrate.Text = "115200";
             // 
+            // Disconnect
+            // 
+            this.Disconnect.Location = new System.Drawing.Point(12, 220);
+            this.Disconnect.Name = "Disconnect";
+            this.Disconnect.Size = new System.Drawing.Size(239, 39);
+            this.Disconnect.TabIndex = 6;
+            this.Disconnect.Text = "Disconnect";
+            this.Disconnect.UseVisualStyleBackColor = true;
+            this.Disconnect.Click += new System.EventHandler(this.Disconnect_Click);
+            // 
             // Main_Menu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(278, 382);
+            this.Controls.Add(this.Disconnect);
             this.Controls.Add(this.baudrate);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.Port_name);
@@ -104,6 +116,7 @@
         private System.Windows.Forms.Label Port_name;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox baudrate;
+        private System.Windows.Forms.Button Disconnect;
     }
 }
 

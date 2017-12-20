@@ -37,9 +37,14 @@ namespace Telemetry_System
         private void button1_Click(object sender, EventArgs e)
         {
             //this.Hide();
-           // myport.Close();
+          //  myport.Close();
             Serial_Monitor SerialMonitor = new Serial_Monitor(myport);
             SerialMonitor.Show();
+           // myport.Close();
+            if (!myport.IsOpen)
+            {
+                myport.Open();
+            }
         }
 
 
@@ -49,12 +54,19 @@ namespace Telemetry_System
             in_data = myport.ReadLine();
             try
             {
-                this.Invoke(new EventHandler(displaydata_event));
+                if (!IsHandleCreated)
+                {
+                    this.CreateHandle();
+                }
+
+                    this.Invoke(new EventHandler(displaydata_event));
+                
             }
             catch (Exception ex)
             {
+                
                 // MessageBox.Show(ex.Message, "Error");
-                myport.Close();
+                // myport.Close();
             }
 
         }

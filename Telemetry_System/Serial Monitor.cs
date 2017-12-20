@@ -22,7 +22,10 @@ namespace Telemetry_System
            InitializeComponent();
            myport = port;
            myport.DataReceived += myport_DataReceived;
-          // myport.Open();
+            if (!myport.IsOpen)
+            {
+                myport.Open();
+            }
 
         }
          void myport_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -30,11 +33,19 @@ namespace Telemetry_System
 
             
             try {
+                if (!IsHandleCreated)
+                {
+                    this.CreateHandle();
+                }
+                if (!myport.IsOpen)
+                {
+                    myport.Open();
+                }
                 in_data = myport.ReadLine();
                 this.Invoke(new EventHandler(displaydata_event));
             }
             catch(Exception ex) {
-                //MessageBox.Show(ex.Message, "Error");
+              // MessageBox.Show(ex.Message, "Error");
                // myport.Close();
             }
 

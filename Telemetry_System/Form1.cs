@@ -39,7 +39,7 @@ namespace Telemetry_System
             try{
                 myport.Open();
                 MessageBox.Show("Connection successful");//mpu9255 
-                myport.Close();
+               myport.Close();
                // this.Hide();
                 MainScreen mainScreen = new MainScreen(myport);
                 mainScreen.Show();
@@ -48,11 +48,14 @@ namespace Telemetry_System
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"errors opening port COM3 ");
+                MessageBox.Show(ex.Message,"Error Opening Port");
             }
             
         }
 
-
+        private void Disconnect_Click(object sender, EventArgs e)
+        {
+            myport.Close();
+        }
     }
 }
