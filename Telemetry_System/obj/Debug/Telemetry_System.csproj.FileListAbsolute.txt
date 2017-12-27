@@ -32,3 +32,5 @@ C:\Users\Ben\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_Syste
 C:\Users\Ben\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.Properties.Resources.resources
 C:\Users\Ben\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.Serial_Monitor.resources
 C:\Users\Ben\Desktop\Telemerty-System\Telemetry_System\obj\Debug\Telemetry_System.csproj.GenerateResource.Cache
+C:\Users\Ben\Desktop\Telemerty-System\Telemetry_System\bin\Debug\Databas.mdf
+C:\Users\Ben\Desktop\Telemerty-System\Telemetry_System\bin\Debug\Databas_log.ldf
