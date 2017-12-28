@@ -11,7 +11,10 @@ using System.IO;
 using System.IO.Ports;
 using System.Text.RegularExpressions;
 using System.Data.SqlClient;
-
+using System.Threading;
+using Microsoft.Office.Interop.Excel;
+using Excel = Microsoft.Office.Interop.Excel;
+using SqlDataTable = System.Data;
 
 namespace Telemetry_System
 {
@@ -29,9 +32,12 @@ namespace Telemetry_System
         inputdata data = new inputdata();
         string in_data;
         string currentDir = Directory.GetCurrentDirectory();
-        int delaycounter = 0;
+        bool recording;
+        Thread database;
+
         public MainScreen(SerialPort port)
         {
+           
             InitializeComponent();
             myport = port;
             myport.DataReceived += myport_DataReceived;
@@ -61,6 +67,7 @@ namespace Telemetry_System
         {
 
             in_data = myport.ReadLine();
+            
             try
             {
                 if (!IsHandleCreated)
@@ -90,41 +97,29 @@ namespace Telemetry_System
             int count = 0;
             string patteren = "--";
             string[] substrings = Regex.Split(in_data, patteren);
-            foreach (string match in substrings)
-            {
-                switch (count)
+
+            data.RotaryEcoder = Convert.ToInt32(substrings[0]);
+            data.ax = Convert.ToInt32(substrings[1]);
+            data.ay = Convert.ToInt32(substrings[2]);
+            data.az = Convert.ToInt32(substrings[3]);
+            data.gx = Convert.ToInt32(substrings[4]);
+            data.gy = Convert.ToInt32(substrings[5]);
+            data.gz = Convert.ToInt32(substrings[6]);
+            data.mx = Convert.ToInt32(substrings[7]);
+            data.my = Convert.ToInt32(substrings[8]);
+            data.mz = Convert.ToInt32(substrings[9]);
+
+
+            //insert data to database here probably 
+           // MessageBox.Show(data.RotaryEcoder.ToString());
+                if (recording == true)
                 {
-                    case 0: data.RotaryEcoder = Convert.ToInt32(match);
-                        break;
-                    case 1: data.ax = Convert.ToInt32(match);
-                        break;
-                    case 2: data.ay = Convert.ToInt32(match);
-                        break;
-                    case 3: data.az = Convert.ToInt32(match);
-                        break;
-                    case 4: data.gx = Convert.ToInt32(match);
-                        break;
-                    case 5: data.gy = Convert.ToInt32(match);
-                        break;
-                    case 6: data.gz = Convert.ToInt32(match);
-                        break;
-                    case 7: data.mx = Convert.ToInt32(match);
-                        break;
-                    case 8: data.my = Convert.ToInt32(match);
-                        break;
-                    case 9: data.mz = Convert.ToInt32(match);
-                        break;
-                }
-                //insert data to database here probably 
-               
-                delaycounter++;
-                if (delaycounter >= 5)
-                {
+                    // database = new Thread(Addtodatabase);
+                    //  database.Start();
                     Addtodatabase();
-                    delaycounter = 0;
                 }
-                count++;
-            }
+
+           
         }
         public void Addtodatabase()
         {
@@ -134,7 +129,8 @@ namespace Telemetry_System
             {
                 DatabaseCon.Open();
                 SqlCommand cmd1 = new SqlCommand();
-                cmd1.CommandText = "INSERT INTO DataTable(time, RotaryEcoder, ax, ay, az, gx, gy, gz, mx, my, mz) VALUES ( CURRENT_TIMESTAMP ,@rotaryencoder, @ax, @ay, @az, @gx, @gy, @gz, @mx, @my, @mz);";
+                cmd1.CommandText = "INSERT INTO DataTable(RotaryEcoder, ax, ay, az, gx, gy, gz, mx, my, mz) VALUES ( @rotaryencoder, @ax, @ay, @az, @gx, @gy, @gz, @mx, @my, @mz);";
+              //  cmd1.Parameters.Add("@time", data.time);
                 cmd1.Parameters.Add("@rotaryencoder", data.RotaryEcoder);
                 cmd1.Parameters.Add("@ax", data.ax);
                 cmd1.Parameters.Add("@ay", data.ay);
@@ -161,6 +157,7 @@ namespace Telemetry_System
 
         public void steeringAnimation()
         {
+            /*
             Bitmap image;
             Graphics g;
             image = new Bitmap("SteeringWheel.jpg");
@@ -173,7 +170,82 @@ namespace Telemetry_System
             g.RotateTransform(00.0f);
             g.TranslateTransform(-hw, -hh);
             g.DrawImage(image, new Point(500, 500));
+            */
         }
 
+        private void StartRecording_Click(object sender, EventArgs e)
+        {
+            recording = true;
+        }
+
+        private void StopRecording_Click(object sender, EventArgs e)
+        {
+            recording = false;
+        }
+
+        private void ExcelExport_Click(object sender, EventArgs e)
+        {
+
+            SqlConnection DatabaseCon = new SqlConnection("Data Source = (LocalDB)\\MSSQLLocalDB; AttachDbFilename = |DataDirectory|\\Databas.mdf; Integrated Security = True");
+            DatabaseCon.Open();
+            SqlCommand cmd2 = new SqlCommand("SELECT * FROM DataTable",DatabaseCon);
+            SqlDataAdapter DA = new SqlDataAdapter(cmd2);
+            SqlDataTable.DataTable DT = new SqlDataTable.DataTable();
+            DA.Fill(DT);
+            System.Windows.Forms.SaveFileDialog saveDlg = new System.Windows.Forms.SaveFileDialog();
+            saveDlg.InitialDirectory = currentDir;
+            saveDlg.Filter = "Excel Files(2003)|*.xls| Excel Files(2007)|*.xlsx";
+            //saveDlg.RestoreDirectory = true;
+            saveDlg.FileName = "Race Data";
+            saveDlg.Title = "Export Excel File To";
+            if (saveDlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Microsoft.Office.Interop.Excel.Application ExcelApp = new Microsoft.Office.Interop.Excel.Application();
+                ExcelApp.Application.Workbooks.Add(Type.Missing);
+
+                ExcelApp.Columns.ColumnWidth = 20;
+
+                ExcelApp.Cells[1, 1] = "Rotary Encoder";
+                ExcelApp.Cells[1, 2] = "AX";
+                ExcelApp.Cells[1, 3] = "AY";
+                ExcelApp.Cells[1, 4] = "AZ";
+                ExcelApp.Cells[1, 5] = "GX";
+                ExcelApp.Cells[1, 6] = "GY";
+                ExcelApp.Cells[1, 7] = "GZ";
+                ExcelApp.Cells[1, 8] = "MX";
+                ExcelApp.Cells[1, 9] = "MY";
+                ExcelApp.Cells[1, 10] = "MZ";
+                int i = 0;
+                foreach (DataRow dr in DT.Rows)
+                {
+
+                    ExcelApp.Cells[i + 2, 1] = dr["RotaryEcoder"].ToString();
+                    ExcelApp.Cells[i + 2, 2] = dr["ax"].ToString();
+                    ExcelApp.Cells[i+2, 3] = dr["ay"].ToString();
+                    ExcelApp.Cells[i+2, 4] = dr["az"].ToString();
+                    ExcelApp.Cells[i+2, 5] = dr["gx"].ToString();
+                    ExcelApp.Cells[i+2, 6] = dr["gy"].ToString();
+                    ExcelApp.Cells[i+2, 7] = dr["gz"].ToString();
+                    ExcelApp.Cells[i+2, 8] = dr["mx"].ToString();
+                    ExcelApp.Cells[i+2, 9] = dr["my"].ToString();
+                    ExcelApp.Cells[i+2, 10] = dr["mz"].ToString();
+                    i++;
+                }
+                
+
+                ExcelApp.ActiveWorkbook.SaveCopyAs(saveDlg.FileName.ToString());
+                ExcelApp.ActiveWorkbook.Saved = true;
+                // xlWorkBook.Close(true, misValue, misValue);
+                ExcelApp.Quit();
+            }
+
+
+        }
+
+        private void veiwRecording_Click(object sender, EventArgs e)
+        {
+            VeiwDatabase VD = new VeiwDatabase();
+            VD.ShowDialog();
+        }
     }
 }
