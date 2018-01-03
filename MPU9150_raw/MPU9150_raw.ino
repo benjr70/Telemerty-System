@@ -1,37 +1,16 @@
-// I2C device class (I2Cdev) demonstration Arduino sketch for MPU9150
-// 1/4/2013 original by Jeff Rowberg <jeff@rowberg.net> at https://github.com/jrowberg/i2cdevlib
-//          modified by Aaron Weiss <aaron@sparkfun.com>
-//
-// Changelog:
-//     2011-10-07 - initial release
-//     2013-1-4 - added raw magnetometer output
-
-/* ============================================
-I2Cdev device library code is placed under the MIT license
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-===============================================
-*/
-
-// Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
-// is used in I2Cdev.h
 #include "Wire.h"
+
+//*************************************************************************gps
+#include <SoftwareSerial.h>
+#include <TinyGPS.h>
+TinyGPS gps;
+SoftwareSerial ss(10,9);
+static void smartdelay(unsigned long ms);
+float print_float(float val, float invalid, int len, int prec);
+static void print_int(unsigned long val, unsigned long invalid, int len);
+static void print_date(TinyGPS &gps);
+static void print_str(const char *str, int len);
+//******************************************************************************
 
 // I2Cdev and MPU9150 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
@@ -59,7 +38,8 @@ int counter = 0; // for rotary encoder
 #include "RF24.h"
 RF24 radio(7,8); 
 const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };    
-int data[32];
+double data[32];
+double data2[32];
 //*******************************************************************
 
 void setup() {
@@ -105,21 +85,36 @@ void setup() {
   radio.setDataRate(RF24_1MBPS);
   radio.setAutoAck(1);                     // Ensure autoACK is enabled
   radio.setRetries(2,15);                  // Optionally, increase the delay between retries & # of retries
-  
+  radio.enableDynamicPayloads();
+  radio.setPayloadSize(128);
   radio.setCRCLength(RF24_CRC_8);          // Use 8-bit CRC for performance
   radio.openWritingPipe(pipes[0]);
-  radio.openReadingPipe(1,pipes[1]);
+ 
   
   radio.startListening(); 
   radio.powerUp();
   
-  radio.openWritingPipe(pipes[1]);
-  radio.openReadingPipe(1,pipes[0]);
+
   radio.stopListening();
      //******************************************
+
+    //****************************************************************gps
+    ss.begin(9600);
+   //**********************************************
 }
 
 void loop() {
+
+  float flat, flon;
+  unsigned long age, date, time, chars = 0;
+  unsigned short sentences = 0, failed = 0;
+  int year;
+  byte month, day, hour, minute, second, hundredths;
+  gps.f_get_position(&flat, &flon, &age);
+  gps.stats(&chars, &sentences, &failed);
+  gps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);
+ // flat = print_float(flat, TinyGPS::GPS_INVALID_F_ANGLE, 10, 6);
+ // flon = print_float(flon, TinyGPS::GPS_INVALID_F_ANGLE, 11, 6);
     // read raw accel/gyro/mag measurements from device
     accelGyroMag.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
 
@@ -129,18 +124,21 @@ void loop() {
 
     // display tab-separated accel/gyro/mag x/y/z values
 //  Serial.print("a/g/m:\t");
+
+  Serial.print(counter); Serial.print("\t");
   Serial.print(ax); Serial.print("\t");
   Serial.print(ay); Serial.print("\t");
  Serial.print(az); Serial.print("\t");
   Serial.print(gx); Serial.print("\t");
   Serial.print(gy); Serial.print("\t");
   Serial.print(gz); Serial.print("\t");
-   Serial.print(int(mx)*int(mx)); Serial.print("\t");
-    Serial.print(int(my)*int(my)); Serial.print("\t");
-    Serial.print(int(mz)*int(mz)); Serial.print("\t | ");
-
-    const float N = 256;
-    float mag = mx*mx/N + my*my/N + mz*mz/N;
+   Serial.print(mx); Serial.print("\t");
+    Serial.print(my); Serial.print("\t");
+    Serial.print(mz); Serial.print("\t");
+    Serial.print(flat); Serial.print("\t");
+    Serial.print(flon);Serial.print("\t");
+    Serial.print(hour);Serial.print(":");Serial.print(minute);Serial.print(":");Serial.print(second);Serial.print("\t");
+    Serial.print(gps.f_speed_mps());Serial.println("\t");
 
   if(counter >2000){
     counter = 1;
@@ -148,30 +146,35 @@ void loop() {
   if(counter < 0){
     counter = 1999;
   }
-    Serial.println (counter);
+    radio.openWritingPipe(pipes[0]);
     data[0] = counter;
     data[1] = ax;
     data[2] = ay;
     data[3] = az; 
     data[4] = gx;
     data[5] = gy;
-    data[6] = gx;
+    data[6] = gz;
     data[7] = mx;
-    data[8] = my;
-    data[9] = mz;
-   // data[10] = mag;
-
-  radio.writeFast(&data,32);
     
+    radio.writeFast(&data,120);
+    radio.openWritingPipe(pipes[1]);
+    data2[0] = my;
+    data2[1] = mz;
+    data2[2] = flat;
+    data2[3] = flon;
+    data2[4] = hour;
+    data2[5] = minute;
+    data2[6] = second;
+    data2[7] = gps.f_speed_mps();
+    radio.writeFast(&data2,120);
    // Serial.print(mag); Serial.print("\t");
   //  for (int i=0; i<mag; i++)
  //       Serial.print("*");
 //    Serial.print("\n");
 
-    // blink LED to indicate activity
-    blinkState = !blinkState;
-    digitalWrite(LED_PIN, blinkState);
-    delay(50);
+
+    //delay(50);
+    smartdelay(50);
 }
 
 //******************************************
@@ -198,3 +201,38 @@ void ai1() {
     counter++;
   }
 }
+
+//****************************From GPS code
+static void smartdelay(unsigned long ms)
+{
+  unsigned long start = millis();
+  do 
+  {
+    while (ss.available())
+      gps.encode(ss.read());
+  } while (millis() - start < ms);
+}
+
+float print_float(float val, float invalid, int len, int prec)
+{
+  char latlon[32];
+  if (val == invalid)
+  {
+    while (len-- > 1)
+      Serial.print('*');
+    Serial.print(' ');
+  }
+  else
+  {
+    sprintf(latlon,"%f%d", val, prec);
+    Serial.print(latlon);
+    int vi = abs((int)val);
+    int flen = prec + (val < 0.0 ? 2 : 1); // . and -
+    flen += vi >= 1000 ? 4 : vi >= 100 ? 3 : vi >= 10 ? 2 : 1;
+    for (int i=flen; i<len; ++i)
+      Serial.print(' ');
+  }
+  smartdelay(0);
+  
+}
+//***********************end from GPS code

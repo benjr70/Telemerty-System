@@ -75,7 +75,7 @@ namespace Telemetry_System
                     this.CreateHandle();
                 }
 
-                    this.Invoke(new EventHandler(displaydata_event));
+                    this.Invoke(new EventHandler(lineParse_even));
                   //  steeringAnimation();
                 
             }
@@ -92,7 +92,7 @@ namespace Telemetry_System
         //this parses the in_data line and assigns it to the variable in the structure
         //
         //***************************************************************
-        private void displaydata_event(object sender, EventArgs e)
+        private void lineParse_even(object sender, EventArgs e)
         {
             int count = 0;
             string patteren = "--";

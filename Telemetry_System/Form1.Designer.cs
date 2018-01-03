@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main_Menu));
             this.button1 = new System.Windows.Forms.Button();
             this.port_name_box = new System.Windows.Forms.TextBox();
             this.Port_name = new System.Windows.Forms.Label();
@@ -101,6 +102,7 @@
             this.Controls.Add(this.Port_name);
             this.Controls.Add(this.port_name_box);
             this.Controls.Add(this.button1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Main_Menu";
             this.Text = "Connect";
             this.Load += new System.EventHandler(this.Form1_Load);
