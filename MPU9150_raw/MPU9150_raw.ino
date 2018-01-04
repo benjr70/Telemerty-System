@@ -1,5 +1,4 @@
 #include "Wire.h"
-
 //*************************************************************************gps
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
@@ -24,47 +23,66 @@ static void print_str(const char *str, int len);
 // AD0 high = 0x69
 MPU9150 accelGyroMag;
 
-int16_t ax, ay, az;
-int16_t gx, gy, gz;
-int16_t mx, my, mz;
+const int trigPin1 = 22;
+const int echoPin1 = 23;
+const int trigPin2 = 24;
+const int echoPin2 = 25;
+const int trigPin3 = 26;
+const int echoPin3 = 27;
+const int trigPin4 = 28;
+const int echoPin4 = 29;
+long duration1,duration2,duration3,duration4;
+unsigned long age, date, time, chars = 0;
+unsigned short sentences = 0, failed = 0;
+byte month,day;
+int year;
 
-#define LED_PIN 13
-bool blinkState = false;
+struct data{
+  int16_t ax, ay, az;
+  int16_t gx, gy, gz;
+  int16_t mx, my, mz;
+  int distance1, distance2,distance3,distance4;
+  
+};
 
-int counter = 0; // for rotary encoder
+struct data2{
+  float flat, flon, mph;
+  byte hour, minute, second, hundredths;
+  int rotaryencoder = 0; 
+  int rotaryencoder2 = 0;
+};
 
-//****************************
+struct data data;
+struct data2 data2;
+
+//********************************************************pipe and radio stuff
 #include <SPI.h>
 #include "RF24.h"
 RF24 radio(7,8); 
 const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };    
-double data[32];
-double data2[32];
 //*******************************************************************
 
 void setup() {
-
-  //******************************************************************* for Accel/gryo
-    // join I2C bus (I2Cdev library doesn't do this automatically)
-    Wire.begin();
-
-    // initialize serial communication
-    // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
-    // it's really up to you depending on your project)
-    Serial.begin(115200);
-
-    // initialize device
-    Serial.println("Initializing I2C devices...");
-    accelGyroMag.initialize();
-
-    // verify connection
-    Serial.println("Testing device connections...");
-    Serial.println(accelGyroMag.testConnection() ? "MPU9150 connection successful" : "MPU9150 connection failed");
-
-    // configure Arduino LED pin for output
-    pinMode(LED_PIN, OUTPUT);
-
-//********************************************************** Rotary Encoder
+  
+  //************************************************************** for Accel/gryo
+  // join I2C bus (I2Cdev library doesn't do this automatically)
+  Wire.begin();
+  
+  // initialize serial communication
+  Serial.begin(115200);
+  
+  // initialize device
+  // Serial.println("Initializing I2C devices...");
+  accelGyroMag.initialize();
+  
+  // verify connection
+  // Serial.println("Testing device connections...");
+  // Serial.println(accelGyroMag.testConnection() ? "MPU9150 connection successful" : "MPU9150 connection failed");
+  
+  //configure Arduino LED pin for output
+  //pinMode(LED_PIN, OUTPUT);
+  
+  //********************************************************** Rotary Encoder
   pinMode(2, INPUT);           // set pin to input
   pinMode(3, INPUT);           // set pin to input
   
@@ -76,9 +94,34 @@ void setup() {
   
   //B rising pulse from encodenren activated ai1(). AttachInterrupt 1 is DigitalPin nr 3 on moust Arduino.
   attachInterrupt(1, ai1, RISING);
-//*************************************************************
+  
+  pinMode(18, INPUT);           // set pin to input
+  pinMode(19, INPUT);           // set pin to input
+  
+  digitalWrite(18, HIGH);       // turn on pullup resistors
+  digitalWrite(19, HIGH);       // turn on pullup resistors
+  //Setting up interrupt
+  //A rising pulse from encodenren activated ai4(). AttachInterrupt 4 is DigitalPin nr 18 on moust Arduino.
+  attachInterrupt(4, ai4, RISING);
+  
+  //B rising pulse from encodenren activated ai5(). AttachInterrupt 5 is DigitalPin nr 19 on moust Arduino.
+  attachInterrupt(5, ai5, RISING);
+  
+  
+  //************************************************************* distance sensor set up
+  pinMode(trigPin1, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin1, INPUT); // Sets the echoPin as an Input
+  
+  pinMode(trigPin2, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin2, INPUT); // Sets the echoPin as an Input
 
-     //*******************************************Transfor
+  pinMode(trigPin3, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin3, INPUT); // Sets the echoPin as an Input
+  
+  pinMode(trigPin4, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin4, INPUT); // Sets the echoPin as an Input
+  
+  //*******************************************Transfor pipe set up
   radio.begin();                           // Setup and configure rf radio
   radio.setChannel(1);
   radio.setPALevel(RF24_PA_MAX);
@@ -89,150 +132,181 @@ void setup() {
   radio.setPayloadSize(128);
   radio.setCRCLength(RF24_CRC_8);          // Use 8-bit CRC for performance
   radio.openWritingPipe(pipes[0]);
- 
-  
   radio.startListening(); 
   radio.powerUp();
-  
-
   radio.stopListening();
-     //******************************************
+  
+  //****************************************************************gps software serial
+  ss.begin(9600);
 
-    //****************************************************************gps
-    ss.begin(9600);
-   //**********************************************
 }
 
 void loop() {
 
-  float flat, flon;
-  unsigned long age, date, time, chars = 0;
-  unsigned short sentences = 0, failed = 0;
-  int year;
-  byte month, day, hour, minute, second, hundredths;
-  gps.f_get_position(&flat, &flon, &age);
+  
+  //*******************************************************GPS stuff
+  gps.f_get_position(&data2.flat, &data2.flon, &age);
   gps.stats(&chars, &sentences, &failed);
-  gps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);
- // flat = print_float(flat, TinyGPS::GPS_INVALID_F_ANGLE, 10, 6);
- // flon = print_float(flon, TinyGPS::GPS_INVALID_F_ANGLE, 11, 6);
-    // read raw accel/gyro/mag measurements from device
-    accelGyroMag.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
-
-    // these methods (and a few others) are also available
-    //accelGyroMag.getAcceleration(&ax, &ay, &az);
-    //accelGyroMag.getRotation(&gx, &gy, &gz);
-
-    // display tab-separated accel/gyro/mag x/y/z values
-//  Serial.print("a/g/m:\t");
-
-  Serial.print(counter); Serial.print("\t");
-  Serial.print(ax); Serial.print("\t");
-  Serial.print(ay); Serial.print("\t");
- Serial.print(az); Serial.print("\t");
-  Serial.print(gx); Serial.print("\t");
-  Serial.print(gy); Serial.print("\t");
-  Serial.print(gz); Serial.print("\t");
-   Serial.print(mx); Serial.print("\t");
-    Serial.print(my); Serial.print("\t");
-    Serial.print(mz); Serial.print("\t");
-    Serial.print(flat); Serial.print("\t");
-    Serial.print(flon);Serial.print("\t");
-    Serial.print(hour);Serial.print(":");Serial.print(minute);Serial.print(":");Serial.print(second);Serial.print("\t");
-    Serial.print(gps.f_speed_mps());Serial.println("\t");
-
-  if(counter >2000){
-    counter = 1;
+  gps.crack_datetime(&year, &month, &day, &data2.hour, &data2.minute, &data2.second, &data2.hundredths, &age);
+  data2.mph = gps.f_speed_mps();
+  
+  //***********************************************read raw accel/gyro/mag measurements from device 
+  accelGyroMag.getMotion9(&data.ax, &data.ay, &data.az, &data.gx, &data.gy, &data.gz, &data.mx, &data.my, &data.mz);
+  
+  //******************************************print all the stuff
+  Serial.print(data2.rotaryencoder); Serial.print("\t");
+  Serial.print(data2.rotaryencoder2); Serial.print("\t");
+  Serial.print(data.ax); Serial.print("\t");
+  Serial.print(data.ay); Serial.print("\t");
+  Serial.print(data.az); Serial.print("\t");
+  Serial.print(data.gx); Serial.print("\t");
+  Serial.print(data.gy); Serial.print("\t");
+  Serial.print(data.gz); Serial.print("\t");
+  Serial.print(data.mx); Serial.print("\t");
+  Serial.print(data.my); Serial.print("\t");
+  Serial.print(data.mz); Serial.print("\t");
+  Serial.print(data2.flat); Serial.print("\t");
+  Serial.print(data2.flon);Serial.print("\t");
+  Serial.print(data2.hour);Serial.print(":");Serial.print(data2.minute);Serial.print(":");Serial.print(data2.second);Serial.print(":");Serial.print(data2.hundredths);Serial.print("\t");
+  Serial.print(data2.mph);Serial.print("\t");
+  Serial.print(data.distance1);Serial.print("\t");
+  Serial.print(data.distance2);Serial.print("\t");
+  Serial.print(data.distance3);Serial.print("\t");
+  Serial.print(data.distance4);Serial.println("\t");
+  
+  //******************************rotartencoder to reset after one rotation
+  if(data2.rotaryencoder >2000){
+    data2.rotaryencoder = 1;
   }
-  if(counter < 0){
-    counter = 1999;
+  if(data2.rotaryencoder < 0){
+    data2.rotaryencoder = 1999;
   }
-    radio.openWritingPipe(pipes[0]);
-    data[0] = counter;
-    data[1] = ax;
-    data[2] = ay;
-    data[3] = az; 
-    data[4] = gx;
-    data[5] = gy;
-    data[6] = gz;
-    data[7] = mx;
-    
-    radio.writeFast(&data,120);
-    radio.openWritingPipe(pipes[1]);
-    data2[0] = my;
-    data2[1] = mz;
-    data2[2] = flat;
-    data2[3] = flon;
-    data2[4] = hour;
-    data2[5] = minute;
-    data2[6] = second;
-    data2[7] = gps.f_speed_mps();
-    radio.writeFast(&data2,120);
-   // Serial.print(mag); Serial.print("\t");
-  //  for (int i=0; i<mag; i++)
- //       Serial.print("*");
-//    Serial.print("\n");
+  if(data2.rotaryencoder2 >2000){
+    data2.rotaryencoder2 = 1;
+  }
+  if(data2.rotaryencoder2 < 0){
+    data2.rotaryencoder2 = 1999;
+  }
+  
+  //******************************pipe writes
+  radio.openWritingPipe(pipes[0]);
+  radio.writeFast(&data,sizeof(data));
+  
+  radio.openWritingPipe(pipes[1]);
+  radio.writeFast(&data2,sizeof(data2));
+  delay(50);
 
+  smartdelay(50);
+  
+  //************************distance stuff
+  // Clears the trigPin
+  digitalWrite(trigPin1, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin1, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration1 = pulseIn(echoPin1, HIGH,5000);
+  // Calculating the distance
+  data.distance1= duration1*0.034/2;
 
-    //delay(50);
-    smartdelay(50);
+    // Clears the trigPin
+  digitalWrite(trigPin2, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin2, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin2, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration2 = pulseIn(echoPin2, HIGH,5000);
+  // Calculating the distance
+  data.distance2= duration2*0.034/2;
+
+    // Clears the trigPin
+  digitalWrite(trigPin3, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin3, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin3, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration3 = pulseIn(echoPin3, HIGH,5000);
+  // Calculating the distance
+  data.distance3= duration3*0.034/2;
+
+    // Clears the trigPin
+  digitalWrite(trigPin4, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin4, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin4, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration4 = pulseIn(echoPin4, HIGH,5000);
+  // Calculating the distance
+  data.distance4 = duration4*0.034/2;
+  
 }
 
 //******************************************
-//for roatry encoder
+//for roatry encoder 1
 //********************************************
 void ai0() {
   // ai0 is activated if DigitalPin nr 2 is going from LOW to HIGH
   // Check pin 3 to determine the direction
   if(digitalRead(3)==LOW) {
-    counter++;
+    data2.rotaryencoder++;
   }else{
-    counter--;
+    data2.rotaryencoder--;
   }
 }
 //******************************************
-//for roatry encoder
+//for roatry encoder 1
 //********************************************
 void ai1() {
   // ai0 is activated if DigitalPin nr 3 is going from LOW to HIGH
   // Check with pin 2 to determine the direction
   if(digitalRead(2)==LOW) {
-    counter--;
+    data2.rotaryencoder--;
   }else{
-    counter++;
+    data2.rotaryencoder++;
   }
 }
-
-//****************************From GPS code
+//******************************************
+//for roatry encoder 2
+//********************************************
+void ai4() {
+  // ai0 is activated if DigitalPin nr 2 is going from LOW to HIGH
+  // Check pin 3 to determine the direction
+  if(digitalRead(18)==LOW) {
+    data2.rotaryencoder2 ++;
+  }else{
+    data2.rotaryencoder2 --;
+  }
+}
+//******************************************
+//for roatry encoder 2
+//********************************************
+void ai5() {
+  // ai0 is activated if DigitalPin nr 3 is going from LOW to HIGH
+  // Check with pin 2 to determine the direction
+  if(digitalRead(19)==LOW) {
+    data2.rotaryencoder2 --;
+  }else{
+    data2.rotaryencoder2 ++;
+  }
+}
+//****************************for GPS code
 static void smartdelay(unsigned long ms)
 {
+  
   unsigned long start = millis();
   do 
   {
-    while (ss.available())
+    while (ss.available()){
       gps.encode(ss.read());
+    }
   } while (millis() - start < ms);
-}
 
-float print_float(float val, float invalid, int len, int prec)
-{
-  char latlon[32];
-  if (val == invalid)
-  {
-    while (len-- > 1)
-      Serial.print('*');
-    Serial.print(' ');
-  }
-  else
-  {
-    sprintf(latlon,"%f%d", val, prec);
-    Serial.print(latlon);
-    int vi = abs((int)val);
-    int flen = prec + (val < 0.0 ? 2 : 1); // . and -
-    flen += vi >= 1000 ? 4 : vi >= 100 ? 3 : vi >= 10 ? 2 : 1;
-    for (int i=flen; i<len; ++i)
-      Serial.print(' ');
-  }
-  smartdelay(0);
-  
 }
-//***********************end from GPS code

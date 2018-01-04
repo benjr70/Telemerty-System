@@ -21,8 +21,9 @@ namespace Telemetry_System
     public struct inputdata
     {
        public int RotaryEcoder;
-       public int ax, ay, az, gx, gy, gz, mx, my, mz; 
-        
+       public int ax, ay, az, gx, gy, gz, mx, my, mz;
+       public float lat, lon, mph;
+       public int hour, minute, second;
     }
     
   
@@ -108,7 +109,12 @@ namespace Telemetry_System
             data.mx = Convert.ToInt32(substrings[7]);
             data.my = Convert.ToInt32(substrings[8]);
             data.mz = Convert.ToInt32(substrings[9]);
-
+            data.lat = Convert.ToInt32(substrings[10]);
+            data.lon = Convert.ToInt32(substrings[11]);
+            data.hour = Convert.ToInt32(substrings[12]);
+            data.minute = Convert.ToInt32(substrings[13]);
+            data.second = Convert.ToInt32(substrings[14]);
+            data.mph = Convert.ToInt32(substrings[15]);
 
             //insert data to database here probably 
            // MessageBox.Show(data.RotaryEcoder.ToString());
