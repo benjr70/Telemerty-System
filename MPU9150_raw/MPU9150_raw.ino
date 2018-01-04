@@ -159,7 +159,7 @@ void loop() {
   accelGyroMag.getMotion9(&data.ax, &data.ay, &data.az, &data.gx, &data.gy, &data.gz, &data.mx, &data.my, &data.mz);
   
   //******************************************print all the stuff
-  
+ 
   Serial.print(data2.rotaryencoder); Serial.print("\t");
   Serial.print(data2.rotaryencoder2); Serial.print("\t");
   Serial.print(data.ax); Serial.print("\t");

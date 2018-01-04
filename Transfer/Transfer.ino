@@ -16,7 +16,7 @@ struct data{
 
 struct data2{
   //float flat, flon, mph;
-  //byte hour, minute, second, hundredths;
+ // byte hour, minute, second, hundredths;
   int rotaryencoder = 0; 
   int rotaryencoder2 = 0;
 };
@@ -52,8 +52,8 @@ void loop(void){
     radio.read(&data,sizeof(data));
     radio.openReadingPipe(1,pipes[1]);
     radio.read(&data2, sizeof(data2));
-
-   Serial.print(data2.rotaryencoder);Serial.print("\t");
+   /*  
+  Serial.print(data2.rotaryencoder);Serial.print("\t");
   Serial.print(data2.rotaryencoder2); Serial.print("\t");
   Serial.print(data.ax); Serial.print("\t");
   Serial.print(data.ay); Serial.print("\t");
@@ -67,8 +67,8 @@ void loop(void){
   Serial.print(data.distance1);Serial.print("\t");
   Serial.print(data.distance2);Serial.print("\t");
   Serial.print(data.distance3);Serial.print("\t");
-  Serial.print(data.distance4);Serial.print("\t");
-/*
+  Serial.print(data.distance4);Serial.println("\t");
+*/
   Serial.print(data2.rotaryencoder); Serial.print("--");
   Serial.print(data2.rotaryencoder2); Serial.print("--");
   Serial.print(data.ax); Serial.print("--");
@@ -80,24 +80,15 @@ void loop(void){
   Serial.print(data.mx); Serial.print("--");
   Serial.print(data.my); Serial.print("--");
   Serial.print(data.mz); Serial.print("--");
-  
-  Serial.print(data.flat); Serial.print("--");
-  Serial.print(data.flon);Serial.print("--");
-  Serial.print(data2.hour);Serial.print("--");
-  Serial.print(data2.minute);Serial.print("--");
-  Serial.print(data2.second);Serial.print("--");
-  Serial.print(data2.hundredths);Serial.print("--");
-  
-  Serial.print(data.mph);Serial.print("--");
-    Serial.print(data.distance1);Serial.print("--");
+  Serial.print(data.distance1);Serial.print("--");
   Serial.print(data.distance2);Serial.print("--");
   Serial.print(data.distance3);Serial.print("--");
   Serial.print(data.distance4);Serial.print("--");
   Serial.println("E");
-*/
-  
+
   }
-  //delay(35);
+  delay(35);
+
 
 
   /*
@@ -111,5 +102,5 @@ void loop(void){
   */
 
   
-  Serial.println("E");
+ // Serial.println("E");
 }
