@@ -20,10 +20,11 @@ namespace Telemetry_System
 {
     public struct inputdata
     {
-       public int RotaryEcoder;
+       public int RotaryEcoder, RotaryEcoder2;
        public int ax, ay, az, gx, gy, gz, mx, my, mz;
        public float lat, lon, mph;
        public int hour, minute, second;
+       public int distance1, distance2, distance3, distance4;
     }
     
   
@@ -31,6 +32,7 @@ namespace Telemetry_System
     {
         SerialPort myport;
         inputdata data = new inputdata();
+        
         string in_data;
         string currentDir = Directory.GetCurrentDirectory();
         bool recording;
@@ -95,11 +97,11 @@ namespace Telemetry_System
         //***************************************************************
         private void lineParse_even(object sender, EventArgs e)
         {
-            int count = 0;
             string patteren = "--";
             string[] substrings = Regex.Split(in_data, patteren);
 
             data.RotaryEcoder = Convert.ToInt32(substrings[0]);
+            data.RotaryEcoder2 = Convert.ToInt32(substrings[0]);
             data.ax = Convert.ToInt32(substrings[1]);
             data.ay = Convert.ToInt32(substrings[2]);
             data.az = Convert.ToInt32(substrings[3]);
@@ -109,16 +111,21 @@ namespace Telemetry_System
             data.mx = Convert.ToInt32(substrings[7]);
             data.my = Convert.ToInt32(substrings[8]);
             data.mz = Convert.ToInt32(substrings[9]);
-            data.lat = Convert.ToInt32(substrings[10]);
-            data.lon = Convert.ToInt32(substrings[11]);
-            data.hour = Convert.ToInt32(substrings[12]);
-            data.minute = Convert.ToInt32(substrings[13]);
-            data.second = Convert.ToInt32(substrings[14]);
-            data.mph = Convert.ToInt32(substrings[15]);
+            data.distance1 = Convert.ToInt32(substrings[10]);
+            data.distance2 = Convert.ToInt32(substrings[11]);
+            data.distance3 = Convert.ToInt32(substrings[12]);
+            data.distance4 = Convert.ToInt32(substrings[13]);
+
+            // data.lat = Convert.ToInt32(substrings[10]);
+            //  data.lon = Convert.ToInt32(substrings[11]);
+            //  data.hour = Convert.ToInt32(substrings[12]);
+            //  data.minute = Convert.ToInt32(substrings[13]);
+            //  data.second = Convert.ToInt32(substrings[14]);
+            //   data.mph = Convert.ToInt32(substrings[15]);
 
             //insert data to database here probably 
-           // MessageBox.Show(data.RotaryEcoder.ToString());
-                if (recording == true)
+            // MessageBox.Show(data.RotaryEcoder.ToString());
+            if (recording == true)
                 {
                     // database = new Thread(Addtodatabase);
                     //  database.Start();
@@ -129,35 +136,7 @@ namespace Telemetry_System
         }
         public void Addtodatabase()
         {
-            SqlConnection DatabaseCon = new SqlConnection("Data Source = (LocalDB)\\MSSQLLocalDB; AttachDbFilename = |DataDirectory|\\Databas.mdf; Integrated Security = True");
-
-            try
-            {
-                DatabaseCon.Open();
-                SqlCommand cmd1 = new SqlCommand();
-                cmd1.CommandText = "INSERT INTO DataTable(RotaryEcoder, ax, ay, az, gx, gy, gz, mx, my, mz) VALUES ( @rotaryencoder, @ax, @ay, @az, @gx, @gy, @gz, @mx, @my, @mz);";
-              //  cmd1.Parameters.Add("@time", data.time);
-                cmd1.Parameters.Add("@rotaryencoder", data.RotaryEcoder);
-                cmd1.Parameters.Add("@ax", data.ax);
-                cmd1.Parameters.Add("@ay", data.ay);
-                cmd1.Parameters.Add("@az", data.az);
-                cmd1.Parameters.Add("@gx", data.gx);
-                cmd1.Parameters.Add("@gy", data.gy);
-                cmd1.Parameters.Add("@gz", data.gz);
-                cmd1.Parameters.Add("@mx", data.mx);
-                cmd1.Parameters.Add("@my", data.my);
-                cmd1.Parameters.Add("@mz", data.mz);
-                cmd1.CommandType = CommandType.Text;
-                cmd1.Connection = DatabaseCon;
-                cmd1.ExecuteNonQuery();
-
-
-                DatabaseCon.Close();
-            }
-            catch (Exception ex)
-            {
-
-            }
+                
 
         }
 
@@ -191,7 +170,7 @@ namespace Telemetry_System
 
         private void ExcelExport_Click(object sender, EventArgs e)
         {
-
+            /*
             SqlConnection DatabaseCon = new SqlConnection("Data Source = (LocalDB)\\MSSQLLocalDB; AttachDbFilename = |DataDirectory|\\Databas.mdf; Integrated Security = True");
             DatabaseCon.Open();
             SqlCommand cmd2 = new SqlCommand("SELECT * FROM DataTable",DatabaseCon);
@@ -244,7 +223,7 @@ namespace Telemetry_System
                 // xlWorkBook.Close(true, misValue, misValue);
                 ExcelApp.Quit();
             }
-
+            */
 
         }
 

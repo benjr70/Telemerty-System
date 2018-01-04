@@ -1,4 +1,5 @@
 #include "Wire.h"
+#include <Time.h>
 //*************************************************************************gps
 /*
 #include <SoftwareSerial.h>
@@ -10,6 +11,7 @@ static void smartdelay(unsigned long ms);
 
 //******************************************************************************
 
+//hourFormat12();
 // I2Cdev and MPU9150 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
 #include "I2Cdev.h"
@@ -31,10 +33,9 @@ const int echoPin3 = 27;
 const int trigPin4 = 28;
 const int echoPin4 = 29;
 long duration1,duration2,duration3,duration4;
-unsigned long age, date, time, chars = 0;
+unsigned long age, date,chars = 0;
 unsigned short sentences = 0, failed = 0;
-byte month,day;
-int year;
+
 
 struct data{
   int16_t ax, ay, az;
@@ -62,7 +63,7 @@ const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };
 //*******************************************************************
 
 void setup() {
-  
+
   //************************************************************** for Accel/gryo
   // join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
