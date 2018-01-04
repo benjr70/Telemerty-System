@@ -1,14 +1,13 @@
 #include "Wire.h"
 //*************************************************************************gps
+/*
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
 TinyGPS gps;
 SoftwareSerial ss(10,9);
+*/
 static void smartdelay(unsigned long ms);
-float print_float(float val, float invalid, int len, int prec);
-static void print_int(unsigned long val, unsigned long invalid, int len);
-static void print_date(TinyGPS &gps);
-static void print_str(const char *str, int len);
+
 //******************************************************************************
 
 // I2Cdev and MPU9150 must be installed as libraries, or else the .cpp/.h files
@@ -41,13 +40,13 @@ struct data{
   int16_t ax, ay, az;
   int16_t gx, gy, gz;
   int16_t mx, my, mz;
-  int distance1, distance2,distance3,distance4;
+  int16_t distance1, distance2,distance3,distance4;
   
 };
 
 struct data2{
-  float flat, flon, mph;
-  byte hour, minute, second, hundredths;
+  //float flat, flon, mph;
+ // byte hour, minute, second, hundredths;
   int rotaryencoder = 0; 
   int rotaryencoder2 = 0;
 };
@@ -120,7 +119,12 @@ void setup() {
   
   pinMode(trigPin4, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin4, INPUT); // Sets the echoPin as an Input
-  
+
+  //clears trigpins
+  digitalWrite(trigPin1, LOW);
+  digitalWrite(trigPin2, LOW);
+  digitalWrite(trigPin3, LOW);
+  digitalWrite(trigPin4, LOW);
   //*******************************************Transfor pipe set up
   radio.begin();                           // Setup and configure rf radio
   radio.setChannel(1);
@@ -137,7 +141,7 @@ void setup() {
   radio.stopListening();
   
   //****************************************************************gps software serial
-  ss.begin(9600);
+  //ss.begin(9600);
 
 }
 
@@ -145,15 +149,17 @@ void loop() {
 
   
   //*******************************************************GPS stuff
+  /*
   gps.f_get_position(&data2.flat, &data2.flon, &age);
   gps.stats(&chars, &sentences, &failed);
   gps.crack_datetime(&year, &month, &day, &data2.hour, &data2.minute, &data2.second, &data2.hundredths, &age);
   data2.mph = gps.f_speed_mps();
-  
+  */
   //***********************************************read raw accel/gyro/mag measurements from device 
   accelGyroMag.getMotion9(&data.ax, &data.ay, &data.az, &data.gx, &data.gy, &data.gz, &data.mx, &data.my, &data.mz);
   
   //******************************************print all the stuff
+  
   Serial.print(data2.rotaryencoder); Serial.print("\t");
   Serial.print(data2.rotaryencoder2); Serial.print("\t");
   Serial.print(data.ax); Serial.print("\t");
@@ -165,10 +171,10 @@ void loop() {
   Serial.print(data.mx); Serial.print("\t");
   Serial.print(data.my); Serial.print("\t");
   Serial.print(data.mz); Serial.print("\t");
-  Serial.print(data2.flat); Serial.print("\t");
-  Serial.print(data2.flon);Serial.print("\t");
-  Serial.print(data2.hour);Serial.print(":");Serial.print(data2.minute);Serial.print(":");Serial.print(data2.second);Serial.print(":");Serial.print(data2.hundredths);Serial.print("\t");
-  Serial.print(data2.mph);Serial.print("\t");
+ // Serial.print(data2.flat, 6); Serial.print("\t");
+ // Serial.print(data2.flon, 6);Serial.print("\t");
+ // Serial.print(data2.hour);Serial.print(":");Serial.print(data2.minute);Serial.print(":");Serial.print(data2.second);Serial.print(":");Serial.print(data2.hundredths);Serial.print("\t");
+ // Serial.print(data2.mph);Serial.print("\t");
   Serial.print(data.distance1);Serial.print("\t");
   Serial.print(data.distance2);Serial.print("\t");
   Serial.print(data.distance3);Serial.print("\t");
@@ -189,19 +195,20 @@ void loop() {
   }
   
   //******************************pipe writes
+  delay(13);
   radio.openWritingPipe(pipes[0]);
   radio.writeFast(&data,sizeof(data));
   
   radio.openWritingPipe(pipes[1]);
   radio.writeFast(&data2,sizeof(data2));
-  delay(50);
+  delay(13);
 
-  smartdelay(50);
+  //smartdelay(50);
   
   //************************distance stuff
   // Clears the trigPin
-  digitalWrite(trigPin1, LOW);
-  delayMicroseconds(2);
+ // digitalWrite(trigPin1, LOW);
+  //delayMicroseconds(2);
   // Sets the trigPin on HIGH state for 10 micro seconds
   digitalWrite(trigPin1, HIGH);
   delayMicroseconds(10);
@@ -212,8 +219,8 @@ void loop() {
   data.distance1= duration1*0.034/2;
 
     // Clears the trigPin
-  digitalWrite(trigPin2, LOW);
-  delayMicroseconds(2);
+ // digitalWrite(trigPin2, LOW);
+ // delayMicroseconds(2);
   // Sets the trigPin on HIGH state for 10 micro seconds
   digitalWrite(trigPin2, HIGH);
   delayMicroseconds(10);
@@ -224,8 +231,8 @@ void loop() {
   data.distance2= duration2*0.034/2;
 
     // Clears the trigPin
-  digitalWrite(trigPin3, LOW);
-  delayMicroseconds(2);
+ // digitalWrite(trigPin3, LOW);
+ // delayMicroseconds(2);
   // Sets the trigPin on HIGH state for 10 micro seconds
   digitalWrite(trigPin3, HIGH);
   delayMicroseconds(10);
@@ -236,8 +243,8 @@ void loop() {
   data.distance3= duration3*0.034/2;
 
     // Clears the trigPin
-  digitalWrite(trigPin4, LOW);
-  delayMicroseconds(2);
+ // digitalWrite(trigPin4, LOW);
+  //delayMicroseconds(2);
   // Sets the trigPin on HIGH state for 10 micro seconds
   digitalWrite(trigPin4, HIGH);
   delayMicroseconds(10);
@@ -298,6 +305,7 @@ void ai5() {
   }
 }
 //****************************for GPS code
+/*
 static void smartdelay(unsigned long ms)
 {
   
@@ -310,3 +318,4 @@ static void smartdelay(unsigned long ms)
   } while (millis() - start < ms);
 
 }
+*/

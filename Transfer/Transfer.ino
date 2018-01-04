@@ -10,13 +10,13 @@ struct data{
   int16_t ax, ay, az;
   int16_t gx, gy, gz;
   int16_t mx, my, mz;
-  int distance1, distance2, distance3, distance4;
+  int16_t distance1, distance2, distance3, distance4;
  
 };
 
 struct data2{
-  float flat, flon, mph;
-  byte hour, minute, second, hundredths;
+  //float flat, flon, mph;
+  //byte hour, minute, second, hundredths;
   int rotaryencoder = 0; 
   int rotaryencoder2 = 0;
 };
@@ -52,8 +52,22 @@ void loop(void){
     radio.read(&data,sizeof(data));
     radio.openReadingPipe(1,pipes[1]);
     radio.read(&data2, sizeof(data2));
-  }
-  delay(50);
+
+   Serial.print(data2.rotaryencoder);Serial.print("\t");
+  Serial.print(data2.rotaryencoder2); Serial.print("\t");
+  Serial.print(data.ax); Serial.print("\t");
+  Serial.print(data.ay); Serial.print("\t");
+  Serial.print(data.az); Serial.print("\t");
+  Serial.print(data.gx);Serial.print("\t");
+  Serial.print(data.gy); Serial.print("\t");
+  Serial.print(data.gz); Serial.print("\t");
+  Serial.print(data.mx); Serial.print("\t");
+  Serial.print(data.my); Serial.print("\t");
+  Serial.print(data.mz); Serial.print("\t");
+  Serial.print(data.distance1);Serial.print("\t");
+  Serial.print(data.distance2);Serial.print("\t");
+  Serial.print(data.distance3);Serial.print("\t");
+  Serial.print(data.distance4);Serial.print("\t");
 /*
   Serial.print(data2.rotaryencoder); Serial.print("--");
   Serial.print(data2.rotaryencoder2); Serial.print("--");
@@ -66,12 +80,14 @@ void loop(void){
   Serial.print(data.mx); Serial.print("--");
   Serial.print(data.my); Serial.print("--");
   Serial.print(data.mz); Serial.print("--");
+  
   Serial.print(data.flat); Serial.print("--");
   Serial.print(data.flon);Serial.print("--");
   Serial.print(data2.hour);Serial.print("--");
   Serial.print(data2.minute);Serial.print("--");
   Serial.print(data2.second);Serial.print("--");
   Serial.print(data2.hundredths);Serial.print("--");
+  
   Serial.print(data.mph);Serial.print("--");
     Serial.print(data.distance1);Serial.print("--");
   Serial.print(data.distance2);Serial.print("--");
@@ -79,17 +95,12 @@ void loop(void){
   Serial.print(data.distance4);Serial.print("--");
   Serial.println("E");
 */
-  Serial.print(data2.rotaryencoder);Serial.print("\t");
-  Serial.print(data2.rotaryencoder2); Serial.print("\t");
-  Serial.print(data.ax); Serial.print("\t");
-  Serial.print(data.ay); Serial.print("\t");
-  Serial.print(data.az); Serial.print("\t");
-  Serial.print(data.gx);Serial.print("\t");
-  Serial.print(data.gy); Serial.print("\t");
-  Serial.print(data.gz); Serial.print("\t");
-  Serial.print(data.mx); Serial.print("\t");
-  Serial.print(data.my); Serial.print("\t");
-  Serial.print(data.mz); Serial.print("\t");
+  
+  }
+  //delay(35);
+
+
+  /*
   Serial.print(data2.flat, 6);Serial.print("\t");
   Serial.print(data2.flon, 6);Serial.print("\t");
   Serial.print(data2.hour);Serial.print(":");
@@ -97,10 +108,8 @@ void loop(void){
   Serial.print(data2.second);Serial.print(":");
   Serial.print(data2.hundredths);Serial.print("\t");
   Serial.print(data2.mph);Serial.print("\t");
-  Serial.print(data.distance1);Serial.print("\t");
-  Serial.print(data.distance2);Serial.print("\t");
-  Serial.print(data.distance3);Serial.print("\t");
-  Serial.print(data.distance4);Serial.print("\t");
+  */
+
   
   Serial.println("E");
 }
