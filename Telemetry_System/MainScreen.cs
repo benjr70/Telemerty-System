@@ -136,7 +136,7 @@ namespace Telemetry_System
         }
         public void Addtodatabase()
         {
-                
+                 
 
         }
 
