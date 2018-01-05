@@ -80,6 +80,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="LinkedList.cs" />
     <Compile Include="MainScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -94,11 +95,11 @@
     <Compile Include="Serial Monitor.Designer.cs">
       <DependentUpon>Serial Monitor.cs</DependentUpon>
     </Compile>
-    <Compile Include="VeiwDatabase.cs">
+    <Compile Include="ViewRecording.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="VeiwDatabase.Designer.cs">
-      <DependentUpon>VeiwDatabase.cs</DependentUpon>
+    <Compile Include="ViewRecording.Designer.cs">
+      <DependentUpon>ViewRecording.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
@@ -118,8 +119,8 @@
     <EmbeddedResource Include="Serial Monitor.resx">
       <DependentUpon>Serial Monitor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="VeiwDatabase.resx">
-      <DependentUpon>VeiwDatabase.cs</DependentUpon>
+    <EmbeddedResource Include="ViewRecording.resx">
+      <DependentUpon>ViewRecording.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="DatabasDataSet.xsc">
       <DependentUpon>DatabasDataSet.xsd</DependentUpon>

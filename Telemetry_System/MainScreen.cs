@@ -16,6 +16,7 @@ using Microsoft.Office.Interop.Excel;
 using Excel = Microsoft.Office.Interop.Excel;
 using SqlDataTable = System.Data;
 
+
 namespace Telemetry_System
 {
     public struct inputdata
@@ -32,7 +33,7 @@ namespace Telemetry_System
     {
         SerialPort myport;
         inputdata data = new inputdata();
-        
+        LinkedList RecordedData = new LinkedList();
         string in_data;
         string currentDir = Directory.GetCurrentDirectory();
         bool recording;
@@ -101,20 +102,20 @@ namespace Telemetry_System
             string[] substrings = Regex.Split(in_data, patteren);
 
             data.RotaryEcoder = Convert.ToInt32(substrings[0]);
-            data.RotaryEcoder2 = Convert.ToInt32(substrings[0]);
-            data.ax = Convert.ToInt32(substrings[1]);
-            data.ay = Convert.ToInt32(substrings[2]);
-            data.az = Convert.ToInt32(substrings[3]);
-            data.gx = Convert.ToInt32(substrings[4]);
-            data.gy = Convert.ToInt32(substrings[5]);
-            data.gz = Convert.ToInt32(substrings[6]);
-            data.mx = Convert.ToInt32(substrings[7]);
-            data.my = Convert.ToInt32(substrings[8]);
-            data.mz = Convert.ToInt32(substrings[9]);
-            data.distance1 = Convert.ToInt32(substrings[10]);
-            data.distance2 = Convert.ToInt32(substrings[11]);
-            data.distance3 = Convert.ToInt32(substrings[12]);
-            data.distance4 = Convert.ToInt32(substrings[13]);
+            data.RotaryEcoder2 = Convert.ToInt32(substrings[1]);
+            data.ax = Convert.ToInt32(substrings[2]);
+            data.ay = Convert.ToInt32(substrings[3]);
+            data.az = Convert.ToInt32(substrings[4]);
+            data.gx = Convert.ToInt32(substrings[5]);
+            data.gy = Convert.ToInt32(substrings[6]);
+            data.gz = Convert.ToInt32(substrings[7]);
+            data.mx = Convert.ToInt32(substrings[8]);
+            data.my = Convert.ToInt32(substrings[9]);
+            data.mz = Convert.ToInt32(substrings[10]);
+            data.distance1 = Convert.ToInt32(substrings[11]);
+            data.distance2 = Convert.ToInt32(substrings[12]);
+            data.distance3 = Convert.ToInt32(substrings[13]);
+            data.distance4 = Convert.ToInt32(substrings[14]);
 
             // data.lat = Convert.ToInt32(substrings[10]);
             //  data.lon = Convert.ToInt32(substrings[11]);
@@ -136,7 +137,7 @@ namespace Telemetry_System
         }
         public void Addtodatabase()
         {
-                 
+            RecordedData.AppendNode(data);
 
         }
 
@@ -170,13 +171,9 @@ namespace Telemetry_System
 
         private void ExcelExport_Click(object sender, EventArgs e)
         {
-            /*
-            SqlConnection DatabaseCon = new SqlConnection("Data Source = (LocalDB)\\MSSQLLocalDB; AttachDbFilename = |DataDirectory|\\Databas.mdf; Integrated Security = True");
-            DatabaseCon.Open();
-            SqlCommand cmd2 = new SqlCommand("SELECT * FROM DataTable",DatabaseCon);
-            SqlDataAdapter DA = new SqlDataAdapter(cmd2);
-            SqlDataTable.DataTable DT = new SqlDataTable.DataTable();
-            DA.Fill(DT);
+
+            ListNode temp = new ListNode();
+            temp = RecordedData.head;
             System.Windows.Forms.SaveFileDialog saveDlg = new System.Windows.Forms.SaveFileDialog();
             saveDlg.InitialDirectory = currentDir;
             saveDlg.Filter = "Excel Files(2003)|*.xls| Excel Files(2007)|*.xlsx";
@@ -191,46 +188,56 @@ namespace Telemetry_System
                 ExcelApp.Columns.ColumnWidth = 20;
 
                 ExcelApp.Cells[1, 1] = "Rotary Encoder";
-                ExcelApp.Cells[1, 2] = "AX";
-                ExcelApp.Cells[1, 3] = "AY";
-                ExcelApp.Cells[1, 4] = "AZ";
-                ExcelApp.Cells[1, 5] = "GX";
-                ExcelApp.Cells[1, 6] = "GY";
-                ExcelApp.Cells[1, 7] = "GZ";
-                ExcelApp.Cells[1, 8] = "MX";
-                ExcelApp.Cells[1, 9] = "MY";
-                ExcelApp.Cells[1, 10] = "MZ";
+                ExcelApp.Cells[1, 2] = "Rotary Encoder2";
+                ExcelApp.Cells[1, 3] = "AX";
+                ExcelApp.Cells[1, 4] = "AY";
+                ExcelApp.Cells[1, 5] = "AZ";
+                ExcelApp.Cells[1, 6] = "GX";
+                ExcelApp.Cells[1, 7] = "GY";
+                ExcelApp.Cells[1, 8] = "GZ";
+                ExcelApp.Cells[1, 9] = "MX";
+                ExcelApp.Cells[1, 10] = "MY";
+                ExcelApp.Cells[1, 11] = "MZ";
+                ExcelApp.Cells[1, 12] = "Distance1";
+                ExcelApp.Cells[1, 13] = "Distance2";
+                ExcelApp.Cells[1, 14] = "Distance3";
+                ExcelApp.Cells[1, 15] = "Distance4";
                 int i = 0;
-                foreach (DataRow dr in DT.Rows)
+                while (temp.next != null)
                 {
-
-                    ExcelApp.Cells[i + 2, 1] = dr["RotaryEcoder"].ToString();
-                    ExcelApp.Cells[i + 2, 2] = dr["ax"].ToString();
-                    ExcelApp.Cells[i+2, 3] = dr["ay"].ToString();
-                    ExcelApp.Cells[i+2, 4] = dr["az"].ToString();
-                    ExcelApp.Cells[i+2, 5] = dr["gx"].ToString();
-                    ExcelApp.Cells[i+2, 6] = dr["gy"].ToString();
-                    ExcelApp.Cells[i+2, 7] = dr["gz"].ToString();
-                    ExcelApp.Cells[i+2, 8] = dr["mx"].ToString();
-                    ExcelApp.Cells[i+2, 9] = dr["my"].ToString();
-                    ExcelApp.Cells[i+2, 10] = dr["mz"].ToString();
+                    ExcelApp.Cells[i + 2, 1] = temp.data.RotaryEcoder;
+                    ExcelApp.Cells[i + 2, 2] = temp.data.RotaryEcoder2;
+                    ExcelApp.Cells[i + 2, 3] = temp.data.ax;
+                    ExcelApp.Cells[i + 2, 4] = temp.data.ay;
+                    ExcelApp.Cells[i + 2, 5] = temp.data.az;
+                    ExcelApp.Cells[i + 2, 6] = temp.data.gx;
+                    ExcelApp.Cells[i + 2, 7] = temp.data.gy;
+                    ExcelApp.Cells[i + 2, 8] = temp.data.gz;
+                    ExcelApp.Cells[i + 2, 9] = temp.data.mx;
+                    ExcelApp.Cells[i + 2, 10] = temp.data.my;
+                    ExcelApp.Cells[i + 2, 11] = temp.data.mz;
+                    ExcelApp.Cells[i + 2, 12] = temp.data.distance1;
+                    ExcelApp.Cells[i + 2, 13] = temp.data.distance2;
+                    ExcelApp.Cells[i + 2, 14] = temp.data.distance3;
+                    ExcelApp.Cells[i + 2, 15] = temp.data.distance4;
+                    temp = temp.next;
                     i++;
+
                 }
-                
 
                 ExcelApp.ActiveWorkbook.SaveCopyAs(saveDlg.FileName.ToString());
                 ExcelApp.ActiveWorkbook.Saved = true;
                 // xlWorkBook.Close(true, misValue, misValue);
                 ExcelApp.Quit();
             }
-            */
-
+            
+    
         }
 
-        private void veiwRecording_Click(object sender, EventArgs e)
+        private void View_Recording_Click(object sender, EventArgs e)
         {
-            VeiwDatabase VD = new VeiwDatabase();
-            VD.ShowDialog();
+            ViewRecording VR = new ViewRecording(RecordedData);
+            VR.Show();
         }
     }
 }

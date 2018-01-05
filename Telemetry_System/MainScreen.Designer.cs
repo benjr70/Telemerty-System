@@ -33,7 +33,7 @@
             this.StartRecording = new System.Windows.Forms.Button();
             this.StopRecording = new System.Windows.Forms.Button();
             this.ExcelExport = new System.Windows.Forms.Button();
-            this.veiwRecording = new System.Windows.Forms.Button();
+            this.View_Recording = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -72,7 +72,7 @@
             // 
             // ExcelExport
             // 
-            this.ExcelExport.Location = new System.Drawing.Point(237, 4);
+            this.ExcelExport.Location = new System.Drawing.Point(350, 4);
             this.ExcelExport.Name = "ExcelExport";
             this.ExcelExport.Size = new System.Drawing.Size(111, 36);
             this.ExcelExport.TabIndex = 3;
@@ -80,15 +80,15 @@
             this.ExcelExport.UseVisualStyleBackColor = true;
             this.ExcelExport.Click += new System.EventHandler(this.ExcelExport_Click);
             // 
-            // veiwRecording
+            // View_Recording
             // 
-            this.veiwRecording.Location = new System.Drawing.Point(354, 4);
-            this.veiwRecording.Name = "veiwRecording";
-            this.veiwRecording.Size = new System.Drawing.Size(127, 36);
-            this.veiwRecording.TabIndex = 4;
-            this.veiwRecording.Text = "Veiw Recording";
-            this.veiwRecording.UseVisualStyleBackColor = true;
-            this.veiwRecording.Click += new System.EventHandler(this.veiwRecording_Click);
+            this.View_Recording.Location = new System.Drawing.Point(237, 4);
+            this.View_Recording.Name = "View_Recording";
+            this.View_Recording.Size = new System.Drawing.Size(107, 36);
+            this.View_Recording.TabIndex = 4;
+            this.View_Recording.Text = "View Recording";
+            this.View_Recording.UseVisualStyleBackColor = true;
+            this.View_Recording.Click += new System.EventHandler(this.View_Recording_Click);
             // 
             // MainScreen
             // 
@@ -96,7 +96,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.ClientSize = new System.Drawing.Size(1904, 1011);
-            this.Controls.Add(this.veiwRecording);
+            this.Controls.Add(this.View_Recording);
             this.Controls.Add(this.ExcelExport);
             this.Controls.Add(this.StopRecording);
             this.Controls.Add(this.StartRecording);
@@ -114,6 +114,6 @@
         private System.Windows.Forms.Button StartRecording;
         private System.Windows.Forms.Button StopRecording;
         private System.Windows.Forms.Button ExcelExport;
-        private System.Windows.Forms.Button veiwRecording;
+        private System.Windows.Forms.Button View_Recording;
     }
 }
