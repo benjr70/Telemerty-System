@@ -21,8 +21,11 @@ struct data2{
   int rotaryencoder2 = 0;
 };
 
+
 struct data data;
 struct data2 data2;
+struct data buf;
+struct data2 buf2;
 
 void setup(void) {
 
@@ -49,10 +52,13 @@ void loop(void){
 
   while(radio.available()){     
     radio.openReadingPipe(2,pipes[0]); 
-    radio.read(&data,sizeof(data));
+    radio.read(&buf,sizeof(data));
     radio.openReadingPipe(1,pipes[1]);
-    radio.read(&data2, sizeof(data2));
-   /*  
+    radio.read(&buf2, sizeof(data2));
+    
+    data = buf;
+    data2 = buf2;
+  
   Serial.print(data2.rotaryencoder);Serial.print("\t");
   Serial.print(data2.rotaryencoder2); Serial.print("\t");
   Serial.print(data.ax); Serial.print("\t");
@@ -68,7 +74,7 @@ void loop(void){
   Serial.print(data.distance2);Serial.print("\t");
   Serial.print(data.distance3);Serial.print("\t");
   Serial.print(data.distance4);Serial.println("\t");
-*/
+ /*  
   Serial.print(data2.rotaryencoder); Serial.print("--");
   Serial.print(data2.rotaryencoder2); Serial.print("--");
   Serial.print(data.ax); Serial.print("--");
@@ -85,9 +91,9 @@ void loop(void){
   Serial.print(data.distance3);Serial.print("--");
   Serial.print(data.distance4);Serial.print("--");
   Serial.println("E");
-
+*/
   }
-  delay(35);
+  delay(15);
 
 
 

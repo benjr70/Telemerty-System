@@ -1,5 +1,7 @@
 #include "Wire.h"
-#include <Time.h>
+
+
+//#define DEBUG
 //*************************************************************************gps
 /*
 #include <SoftwareSerial.h>
@@ -35,7 +37,13 @@ const int echoPin4 = 29;
 long duration1,duration2,duration3,duration4;
 unsigned long age, date,chars = 0;
 unsigned short sentences = 0, failed = 0;
-
+int s=0;
+int sec=0;
+int hrs=0;
+int minutes=0;
+int initialHours = 00;//variable to initiate hours
+int initialMins = 00;//variable to initiate minutes
+int initialSecs = 00;//variable to initiate seconds
 
 struct data{
   int16_t ax, ay, az;
@@ -59,11 +67,16 @@ struct data2 data2;
 #include <SPI.h>
 #include "RF24.h"
 RF24 radio(7,8); 
-const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };    
-//*******************************************************************
+const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };  
+  
+//******************************************************************* time stuff
+
+
 
 void setup() {
-
+  //****************time stuff
+  
+  
   //************************************************************** for Accel/gryo
   // join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
@@ -148,6 +161,8 @@ void setup() {
 
 void loop() {
 
+  //******************time stuff
+  
   
   //*******************************************************GPS stuff
   /*
@@ -160,7 +175,8 @@ void loop() {
   accelGyroMag.getMotion9(&data.ax, &data.ay, &data.az, &data.gx, &data.gy, &data.gz, &data.mx, &data.my, &data.mz);
   
   //******************************************print all the stuff
- 
+
+#ifdef DEBUG
   Serial.print(data2.rotaryencoder); Serial.print("\t");
   Serial.print(data2.rotaryencoder2); Serial.print("\t");
   Serial.print(data.ax); Serial.print("\t");
@@ -179,30 +195,37 @@ void loop() {
   Serial.print(data.distance1);Serial.print("\t");
   Serial.print(data.distance2);Serial.print("\t");
   Serial.print(data.distance3);Serial.print("\t");
-  Serial.print(data.distance4);Serial.println("\t");
+  Serial.print(data.distance4);Serial.print("\t");
+  Serial.print(mins());Serial.print(":");Serial.print(secs());Serial.print(".");Serial.print(millis()%1000);Serial.println("\t");
+  
+#endif
   
   //******************************rotartencoder to reset after one rotation
-  if(data2.rotaryencoder >2000){
-    data2.rotaryencoder = 1;
-  }
-  if(data2.rotaryencoder < 0){
-    data2.rotaryencoder = 1999;
-  }
-  if(data2.rotaryencoder2 >2000){
-    data2.rotaryencoder2 = 1;
-  }
-  if(data2.rotaryencoder2 < 0){
-    data2.rotaryencoder2 = 1999;
-  }
+//  if(data2.rotaryencoder >2000){
+//    data2.rotaryencoder = 1;
+//  }
+//  if(data2.rotaryencoder < 0){
+//    data2.rotaryencoder = 1999;
+//  }
+//  if(data2.rotaryencoder2 >2000){
+//    data2.rotaryencoder2 = 1;
+//  }
+//  if(data2.rotaryencoder2 < 0){
+//    data2.rotaryencoder2 = 1999;
+//  }
+
+//  data2.rotaryencoder %= 2000;
+//  data2.rotaryencoder2 %= 2000;
   
   //******************************pipe writes
-  delay(13);
+  
+  //delay(13);
   radio.openWritingPipe(pipes[0]);
   radio.writeFast(&data,sizeof(data));
   
   radio.openWritingPipe(pipes[1]);
   radio.writeFast(&data2,sizeof(data2));
-  delay(13);
+  //delay(13);
 
   //smartdelay(50);
   
@@ -320,3 +343,34 @@ static void smartdelay(unsigned long ms)
 
 }
 */
+int seconds()
+{
+    s = initialHours*3600;
+    s = s+(initialMins*60);
+    s = s+initialSecs;
+    s = s+(millis()/1000);
+    return s;
+}
+//this method is for hours
+int hours()
+{
+    hrs = seconds();
+    hrs = hrs/3600;
+    hrs = hrs%24;
+    return hrs;
+}
+//this method is for minutes
+int mins()
+{
+    minutes = seconds();
+    minutes = minutes/60;
+    minutes = minutes%60;
+    return minutes;
+}
+ 
+int secs()
+{
+    sec = seconds();
+    sec = sec%60;
+    return sec;
+}
