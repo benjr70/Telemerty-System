@@ -15,8 +15,8 @@ struct data{
 };
 
 struct data2{
-  //float flat, flon, mph;
- // byte hour, minute, second, hundredths;
+  float flat, flon, mph;
+  byte hour, minute, second, hundredths;
   int rotaryencoder = 0; 
   int rotaryencoder2 = 0;
 };
@@ -52,12 +52,12 @@ void loop(void){
 
   while(radio.available()){     
     radio.openReadingPipe(2,pipes[0]); 
-    radio.read(&buf,sizeof(data));
+    radio.read(&data,sizeof(data));
     radio.openReadingPipe(1,pipes[1]);
-    radio.read(&buf2, sizeof(data2));
+    radio.read(&data2, sizeof(data2));
     
-    data = buf;
-    data2 = buf2;
+   // data = buf;
+   // data2 = buf2;
   
   Serial.print(data2.rotaryencoder);Serial.print("\t");
   Serial.print(data2.rotaryencoder2); Serial.print("\t");
@@ -70,6 +70,13 @@ void loop(void){
   Serial.print(data.mx); Serial.print("\t");
   Serial.print(data.my); Serial.print("\t");
   Serial.print(data.mz); Serial.print("\t");
+  Serial.print(data2.flat, 6);Serial.print("\t");
+  Serial.print(data2.flon, 6);Serial.print("\t");
+  Serial.print(data2.hour);Serial.print(":");
+  Serial.print(data2.minute);Serial.print(":");
+  Serial.print(data2.second);Serial.print(".");
+  Serial.print(data2.hundredths);Serial.print("\t");
+  Serial.print(data2.mph);Serial.print("\t");
   Serial.print(data.distance1);Serial.print("\t");
   Serial.print(data.distance2);Serial.print("\t");
   Serial.print(data.distance3);Serial.print("\t");
@@ -96,16 +103,6 @@ void loop(void){
   delay(15);
 
 
-
-  /*
-  Serial.print(data2.flat, 6);Serial.print("\t");
-  Serial.print(data2.flon, 6);Serial.print("\t");
-  Serial.print(data2.hour);Serial.print(":");
-  Serial.print(data2.minute);Serial.print(":");
-  Serial.print(data2.second);Serial.print(":");
-  Serial.print(data2.hundredths);Serial.print("\t");
-  Serial.print(data2.mph);Serial.print("\t");
-  */
 
   
  // Serial.println("E");

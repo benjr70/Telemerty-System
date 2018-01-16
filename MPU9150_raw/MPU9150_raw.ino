@@ -3,14 +3,16 @@
 
 //#define DEBUG
 //*************************************************************************gps
-/*
+#include <TinyGPS++.h>
 #include <SoftwareSerial.h>
-#include <TinyGPS.h>
-TinyGPS gps;
-SoftwareSerial ss(10,9);
-*/
-static void smartdelay(unsigned long ms);
+static const int RXPin = 10, TXPin = 9;
+static const uint32_t GPSBaud = 9600;
 
+// The TinyGPS++ object
+TinyGPSPlus gps;
+
+// The serial connection to the GPS device
+SoftwareSerial ss(RXPin, TXPin);
 //******************************************************************************
 
 //hourFormat12();
@@ -41,9 +43,9 @@ int s=0;
 int sec=0;
 int hrs=0;
 int minutes=0;
-int initialHours = 00;//variable to initiate hours
-int initialMins = 00;//variable to initiate minutes
-int initialSecs = 00;//variable to initiate seconds
+int initialHours = gps.time.hour();//variable to initiate hours
+int initialMins = gps.time.minute();//variable to initiate minutes
+int initialSecs = gps.time.second();//variable to initiate seconds
 
 struct data{
   int16_t ax, ay, az;
@@ -54,8 +56,8 @@ struct data{
 };
 
 struct data2{
-  //float flat, flon, mph;
- // byte hour, minute, second, hundredths;
+  float flat, flon, mph;
+  byte hour, minute, second, hundredths;
   int rotaryencoder = 0; 
   int rotaryencoder2 = 0;
 };
@@ -74,8 +76,6 @@ const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };
 
 
 void setup() {
-  //****************time stuff
-  
   
   //************************************************************** for Accel/gryo
   // join I2C bus (I2Cdev library doesn't do this automatically)
@@ -155,22 +155,21 @@ void setup() {
   radio.stopListening();
   
   //****************************************************************gps software serial
-  //ss.begin(9600);
+  ss.begin(GPSBaud);
 
 }
 
 void loop() {
-
-  //******************time stuff
-  
-  
+  //********************************time stuff
+ data2.hour = hours();
+ data2.minute = mins();
+ data2.second = secs();
+ data2.hundredths = millis() % 1000;
   //*******************************************************GPS stuff
-  /*
-  gps.f_get_position(&data2.flat, &data2.flon, &age);
-  gps.stats(&chars, &sentences, &failed);
-  gps.crack_datetime(&year, &month, &day, &data2.hour, &data2.minute, &data2.second, &data2.hundredths, &age);
-  data2.mph = gps.f_speed_mps();
-  */
+  data2.flat = gps.location.lat();
+  data2.flon = gps.location.lng();
+  data2.mph = gps.speed.mph();
+  
   //***********************************************read raw accel/gyro/mag measurements from device 
   accelGyroMag.getMotion9(&data.ax, &data.ay, &data.az, &data.gx, &data.gy, &data.gz, &data.mx, &data.my, &data.mz);
   
@@ -188,15 +187,15 @@ void loop() {
   Serial.print(data.mx); Serial.print("\t");
   Serial.print(data.my); Serial.print("\t");
   Serial.print(data.mz); Serial.print("\t");
- // Serial.print(data2.flat, 6); Serial.print("\t");
- // Serial.print(data2.flon, 6);Serial.print("\t");
- // Serial.print(data2.hour);Serial.print(":");Serial.print(data2.minute);Serial.print(":");Serial.print(data2.second);Serial.print(":");Serial.print(data2.hundredths);Serial.print("\t");
- // Serial.print(data2.mph);Serial.print("\t");
+  Serial.print(data2.flat, 6); Serial.print("\t");
+  Serial.print(data2.flon, 6);Serial.print("\t");
+  Serial.print(data2.hour);Serial.print(":");Serial.print(data2.minute);Serial.print(":");Serial.print(data2.second);Serial.print(".");Serial.print(data2.hundredths);Serial.print("\t");
+  Serial.print(data2.mph);Serial.print("\t");
   Serial.print(data.distance1);Serial.print("\t");
   Serial.print(data.distance2);Serial.print("\t");
   Serial.print(data.distance3);Serial.print("\t");
-  Serial.print(data.distance4);Serial.print("\t");
-  Serial.print(mins());Serial.print(":");Serial.print(secs());Serial.print(".");Serial.print(millis()%1000);Serial.println("\t");
+  Serial.print(data.distance4);Serial.println("\t");
+ // Serial.print(mins());Serial.print(":");Serial.print(secs());Serial.print(".");Serial.print(millis()%1000);Serial.println("\t");
   
 #endif
   
@@ -227,7 +226,7 @@ void loop() {
   radio.writeFast(&data2,sizeof(data2));
   //delay(13);
 
-  //smartdelay(50);
+  smartDelay(50);
   
   //************************distance stuff
   // Clears the trigPin
@@ -329,20 +328,17 @@ void ai5() {
   }
 }
 //****************************for GPS code
-/*
-static void smartdelay(unsigned long ms)
+static void smartDelay(unsigned long ms)
 {
-  
   unsigned long start = millis();
   do 
   {
-    while (ss.available()){
+    while (ss.available())
       gps.encode(ss.read());
-    }
   } while (millis() - start < ms);
-
 }
-*/
+
+
 int seconds()
 {
     s = initialHours*3600;
