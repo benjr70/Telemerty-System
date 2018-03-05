@@ -189,31 +189,34 @@ void loop() {
    // Serial.print(" hMSL: ");    Serial.print(pvt.hMSL/1000.0f);
    // Serial.print(" hAcc: ");    Serial.print(pvt.hAcc/1000.0f);
    // Serial.print(" vAcc: ");    Serial.print(pvt.vAcc/1000.0f);
-    Serial.println("gps updated");
+    //Serial.println("gps updated");
   }
   
   //***********************************************read raw accel/gyro/mag measurements from device 
   accelGyroMag.getMotion9(&data.ax, &data.ay, &data.az, &data.gx, &data.gy, &data.gz, &data.mx, &data.my, &data.mz);
+
+  data.mx = data.mx - (236+404); // substract mag offset to the x and y
+  data.my = data.my - 6923;
   
   //******************************************print all the stuff
 
 #ifdef DEBUG
-  Serial.print(data2.rotaryencoder); Serial.print("\t");
-  Serial.print(data2.rotaryencoder2); Serial.print("\t");
+  //Serial.print(data2.rotaryencoder); Serial.print("\t");
+  //Serial.print(data2.rotaryencoder2); Serial.print("\t");
   
-  Serial.print(data.ax); Serial.print("\t");
-  Serial.print(data.ay); Serial.print("\t");
-  Serial.print(data.az); Serial.print("\t");
-  Serial.print(data.gx); Serial.print("\t");
-  Serial.print(data.gy); Serial.print("\t");
-  Serial.print(data.gz); Serial.print("\t");
+ // Serial.print(data.ax); Serial.print("\t");
+ // Serial.print(data.ay); Serial.print("\t");
+ // Serial.print(data.az); Serial.print("\t");
+ // Serial.print(data.gx); Serial.print("\t");
+ // Serial.print(data.gy); Serial.print("\t");
+//  Serial.print(data.gz); Serial.print("\t");
   Serial.print(data.mx); Serial.print("\t");
-  Serial.print(data.my); Serial.print("\t");
-  Serial.print(data.mz); Serial.print("\t");
-  Serial.print(data2.flat, 6); Serial.print("\t");
-  Serial.print(data2.flon, 6);Serial.print("\t");
-  Serial.print(data2.mph);Serial.print("\t");
-  Serial.print(mins());Serial.print(":");Serial.print(secs());Serial.print(".");Serial.print(millis()%1000);Serial.println("\t");
+  Serial.print(data.my); Serial.println("\t");
+ // Serial.print(data.mz); Serial.print("\t");
+//  Serial.print(data2.flat, 6); Serial.print("\t");
+//  Serial.print(data2.flon, 6);Serial.print("\t");
+ // Serial.print(data2.mph);Serial.print("\t");
+//  Serial.print(mins());Serial.print(":");Serial.print(secs());Serial.print(".");Serial.print(millis()%1000);Serial.println("\t");
   //Serial.print(data2.hour);Serial.print(":");Serial.print(data2.minute);Serial.print(":");Serial.print(data2.second);Serial.print(".");Serial.print(data2.hundredths);Serial.print("\t");
 #endif
   
