@@ -2,30 +2,18 @@
 #include "RF24.h"
 
 //****************************radio object and pins
-RF24 radio(8,10);                        // Set up nRF24L01 radio on SPI bus plus pins 7 & 8
+RF24 radio(7,8);                        // Set up nRF24L01 radio on SPI bus plus pins 7 & 8
 const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };   // Radio pipe addresses for the 2 nodes to communicate.
 
 
 struct data{
-  int16_t ax, ay, az;
-  int16_t gx, gy, gz;
-  int16_t mx, my, mz;
-  int16_t distance1, distance2, distance3, distance4;
- 
+  float lat,lon;
+  int ax,ay,az;
+  int yaw, pitch, roll;
 };
-
-struct data2{
-  float flat, flon, mph;
-  byte hour, minute, second, hundredths;
-  int rotaryencoder = 0; 
-  int rotaryencoder2 = 0;
-};
-
 
 struct data data;
-struct data2 data2;
-struct data buf;
-struct data2 buf2;
+
 
 void setup(void) {
 
@@ -53,57 +41,16 @@ void loop(void){
   while(radio.available()){     
     radio.openReadingPipe(2,pipes[0]); 
     radio.read(&data,sizeof(data));
-    radio.openReadingPipe(1,pipes[1]);
-    radio.read(&data2, sizeof(data2));
     
-   // data = buf;
-   // data2 = buf2;
-  
-  Serial.print(data2.rotaryencoder);Serial.print("\t");
-  Serial.print(data2.rotaryencoder2); Serial.print("\t");
-  Serial.print(data.ax); Serial.print("\t");
-  Serial.print(data.ay); Serial.print("\t");
-  Serial.print(data.az); Serial.print("\t");
-  Serial.print(data.gx);Serial.print("\t");
-  Serial.print(data.gy); Serial.print("\t");
-  Serial.print(data.gz); Serial.print("\t");
-  Serial.print(data.mx); Serial.print("\t");
-  Serial.print(data.my); Serial.print("\t");
-  Serial.print(data.mz); Serial.print("\t");
-  Serial.print(data2.flat, 6);Serial.print("\t");
-  Serial.print(data2.flon, 6);Serial.print("\t");
-  Serial.print(data2.hour);Serial.print(":");
-  Serial.print(data2.minute);Serial.print(":");
-  Serial.print(data2.second);Serial.print(".");
-  Serial.print(data2.hundredths);Serial.print("\t");
-  Serial.print(data2.mph);Serial.print("\t");
-  Serial.print(data.distance1);Serial.print("\t");
-  Serial.print(data.distance2);Serial.print("\t");
-  Serial.print(data.distance3);Serial.print("\t");
-  Serial.print(data.distance4);Serial.println("\t");
- /*  
-  Serial.print(data2.rotaryencoder); Serial.print("--");
-  Serial.print(data2.rotaryencoder2); Serial.print("--");
-  Serial.print(data.ax); Serial.print("--");
-  Serial.print(data.ay); Serial.print("--");
-  Serial.print(data.az); Serial.print("--");
-  Serial.print(data.gx); Serial.print("--");
-  Serial.print(data.gy); Serial.print("--");
-  Serial.print(data.gz); Serial.print("--");
-  Serial.print(data.mx); Serial.print("--");
-  Serial.print(data.my); Serial.print("--");
-  Serial.print(data.mz); Serial.print("--");
-  Serial.print(data.distance1);Serial.print("--");
-  Serial.print(data.distance2);Serial.print("--");
-  Serial.print(data.distance3);Serial.print("--");
-  Serial.print(data.distance4);Serial.print("--");
-  Serial.println("E");
-*/
+    Serial.print(data.lat);Serial.print("\t");
+    Serial.print(data.lon);Serial.print("\t");
+    Serial.print(data.ax);Serial.print("\t");
+    Serial.print(data.ay);Serial.print("\t");
+    Serial.print(data.az);Serial.print("\t");
+    Serial.print(data.yaw);Serial.print("\t");
+    Serial.print(data.pitch);Serial.print("\t");
+    Serial.print(data.roll);Serial.println("\t");
   }
   delay(15);
 
-
-
-  
- // Serial.println("E");
 }

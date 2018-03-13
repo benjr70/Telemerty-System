@@ -1,8 +1,12 @@
 //**************************************************************
 //****                      printing stuff                  ****
 //**************************************************************
+
+//uncomment to print for python code to read
+#define PYTHON_READ
+
 //uncomment to see all GPS data
-#define PRINT_GPS
+//#define PRINT_GPS
 
 // uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual quaternion components in a [w, x, y, z] format 
 //#define OUTPUT_READABLE_QUATERNION
@@ -14,7 +18,7 @@
 //#define OUTPUT_READABLE_YAWPITCHROLL
 
 // uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
-#define OUTPUT_READABLE_REALACCEL
+//#define OUTPUT_READABLE_REALACCEL
 
 // uncomment "OUTPUT_READABLE_WORLDACCEL" if you want to see acceleration
 //#define OUTPUT_READABLE_WORLDACCEL
@@ -92,7 +96,22 @@ struct NAV_POSLLH {
 };
 
 NAV_POSLLH posllh;
+//**************************************************************
+//****                       RF24 declaration               ****
+//**************************************************************
+#include <SPI.h>
+#include "RF24.h"
+RF24 radio(7,8); 
+const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };  
 
+
+struct data{
+  float lat,lon;
+  int ax,ay,az;
+  int yaw, pitch, roll;
+};
+
+struct data data;
 
 // ================================================================
 // ===                      INITIAL SETUP                       ===
@@ -177,6 +196,23 @@ void setup() {
     //****                       GPS setup                      ****
     //**************************************************************
     sserial.begin(9600);
+    //**************************************************************
+    //****                       RF24 setup                     ****
+    //**************************************************************
+    radio.begin();                           // Setup and configure rf radio
+    radio.setChannel(1);
+    radio.setPALevel(RF24_PA_MAX);
+    radio.setDataRate(RF24_2MBPS);
+    radio.setAutoAck(1);                     // Ensure autoACK is enabled
+    radio.setRetries(2,15);                  // Optionally, increase the delay between retries & # of retries
+    radio.enableDynamicPayloads();
+    radio.setPayloadSize(128);
+    radio.setCRCLength(RF24_CRC_8);          // Use 8-bit CRC for performance
+    radio.openWritingPipe(pipes[0]);
+    radio.startListening(); 
+    radio.powerUp();
+    radio.stopListening();
+    
 }
 
 
@@ -256,11 +292,15 @@ void loop() {
             Serial.println(euler[2] * 180/M_PI);
         #endif
 
+
+        mpu.dmpGetQuaternion(&q, fifoBuffer);
+        mpu.dmpGetGravity(&gravity, &q);
+        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+        data.yaw = ypr[0] * 180/M_PI;
+        data.pitch = ypr[1] * 180/M_PI;
+        data.roll =ypr[2] * 180/M_PI;
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
             // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
             Serial.print("ypr\t");
             Serial.print(ypr[0] * 180/M_PI);
             Serial.print("\t");
@@ -269,12 +309,15 @@ void loop() {
             Serial.println(ypr[2] * 180/M_PI);
         #endif
 
+        mpu.dmpGetQuaternion(&q, fifoBuffer);
+        mpu.dmpGetAccel(&aa, fifoBuffer);
+        mpu.dmpGetGravity(&gravity, &q);
+        mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+        data.ax = aaReal.x;
+        data.ay = aaReal.y;
+        data.az = aaReal.z;
         #ifdef OUTPUT_READABLE_REALACCEL
             // display real acceleration, adjusted to remove gravity
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetAccel(&aa, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
             Serial.print("areal\t");
             Serial.print(aaReal.x);
             Serial.print("\t");
@@ -308,6 +351,8 @@ void loop() {
     //****                       GPS loop                       ****
     //************************************************************** 
     if ( processGPS() ) {
+     data.lat = posllh.lat/10000000.0f;
+     data.lon = posllh.lon/10000000.0f;
     #ifdef PRINT_GPS
     //Serial.print("iTOW:");      Serial.print(posllh.iTOW);
     Serial.print(" lat/lon: "); Serial.print(posllh.lat/10000000.0f); Serial.print(","); Serial.print(posllh.lon/10000000.0f);
@@ -318,7 +363,26 @@ void loop() {
     Serial.println();
     #endif
     }
+    //**************************************************************
+    //****                       RF24 loop                      ****
+    //************************************************************** 
+    radio.openWritingPipe(pipes[0]);
+    radio.writeFast(&data,sizeof(data));
 
+    
+    //**************************************************************
+    //****                python display loop                   ****
+    //************************************************************** 
+    #ifdef PYTHON_READ
+    Serial.print(data.lat); Serial.print("\t");
+    Serial.print(data.lon); Serial.print("\t");
+    Serial.print(data.ax); Serial.print("\t");
+    Serial.print(data.ay); Serial.print("\t");
+    Serial.print(data.az); Serial.print("\t");
+    Serial.print(data.yaw); Serial.print("\t");
+    Serial.print(data.pitch); Serial.print("\t");
+    Serial.print(data.roll); Serial.println("\t");
+    #endif
 }
 
 // ================================================================
