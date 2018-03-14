@@ -1,6 +1,7 @@
 import serial
 from Tkinter import *
 import serial.tools.list_ports
+import string
 
 root = Tk()
 root.title('Telemetry system');
@@ -21,7 +22,19 @@ def connect():
             connectionport = str(p.device)
     ser = serial.Serial(connectionport,115200)
     while True:
-        print ser.readline()
+        line =  ser.readline()
+        words = string.split(line, "\t")
+        lat   = words[0]
+        lon   = words[1]
+        ax    = words[2]
+        ay    = words[3]
+        az    = words[4]
+        roll  = words[5]
+        pitch = words[6]
+        yaw   = words[7]
+        print line
+       
+
 
 
 PortsLab = Label(connectScreen, text = 'Ports')
@@ -36,5 +49,3 @@ connectBut = Button(connectScreen, text = 'Connect', command = connect)
 connectBut.grid(row = 1, column = 1)
 
 mainloop()
-
-#https://pythonprogramming.net/change-show-new-frame-tkinter/

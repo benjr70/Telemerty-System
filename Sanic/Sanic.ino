@@ -108,11 +108,15 @@ const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };
 struct data{
   float lat,lon;
   int ax,ay,az;
-  int yaw, pitch, roll;
+};
+
+struct data2{
+   int yaw, pitch, roll;
 };
 
 struct data data;
-
+struct data2 data2;
+int i = 0;
 // ================================================================
 // ===                      INITIAL SETUP                       ===
 // ================================================================
@@ -143,18 +147,18 @@ void setup() {
     // crystal solution for the UART timer.
 
     // initialize device
-    Serial.println(F("Initializing I2C devices..."));
+   // Serial.println(F("Initializing I2C devices..."));
     mpu.initialize();
     pinMode(INTERRUPT_PIN, INPUT);
 
     // verify connection
-    Serial.println(F("Testing device connections..."));
-    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-    
+  //  Serial.println(F("Testing device connections..."));
+   // Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+    mpu.testConnection();
     while (Serial.available() && Serial.read()); // empty buffer 
 
     // load and configure the DMP
-    Serial.println(F("Initializing DMP..."));
+   // Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
@@ -166,16 +170,16 @@ void setup() {
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
         // turn on the DMP, now that it's ready
-        Serial.println(F("Enabling DMP..."));
+       // Serial.println(F("Enabling DMP..."));
         mpu.setDMPEnabled(true);
 
         // enable Arduino interrupt detection
-        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+      //  Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
         attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
         mpuIntStatus = mpu.getIntStatus();
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
+     //   Serial.println(F("DMP ready! Waiting for first interrupt..."));
         dmpReady = true;
 
         // get expected DMP packet size for later comparison
@@ -185,9 +189,9 @@ void setup() {
         // 1 = initial memory load failed
         // 2 = DMP configuration updates failed
         // (if it's going to break, usually the code will be 1)
-        Serial.print(F("DMP Initialization failed (code "));
-        Serial.print(devStatus);
-        Serial.println(F(")"));
+       // Serial.print(F("DMP Initialization failed (code "));
+     //   Serial.print(devStatus);
+      //  Serial.println(F(")"));
     }
 
     // configure LED for output
@@ -199,19 +203,19 @@ void setup() {
     //**************************************************************
     //****                       RF24 setup                     ****
     //**************************************************************
-    radio.begin();                           // Setup and configure rf radio
-    radio.setChannel(1);
-    radio.setPALevel(RF24_PA_MAX);
-    radio.setDataRate(RF24_2MBPS);
-    radio.setAutoAck(1);                     // Ensure autoACK is enabled
-    radio.setRetries(2,15);                  // Optionally, increase the delay between retries & # of retries
-    radio.enableDynamicPayloads();
-    radio.setPayloadSize(128);
-    radio.setCRCLength(RF24_CRC_8);          // Use 8-bit CRC for performance
-    radio.openWritingPipe(pipes[0]);
-    radio.startListening(); 
-    radio.powerUp();
-    radio.stopListening();
+  radio.begin();                           // Setup and configure rf radio
+  radio.setChannel(1);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.setDataRate(RF24_2MBPS);
+  radio.setAutoAck(1);                     // Ensure autoACK is enabled
+  radio.setRetries(2,15);                  // Optionally, increase the delay between retries & # of retries
+  radio.enableDynamicPayloads();
+  radio.setPayloadSize(128);
+  radio.setCRCLength(RF24_CRC_8);          // Use 8-bit CRC for performance
+  radio.openWritingPipe(pipes[0]);
+  radio.startListening(); 
+  radio.powerUp();
+  radio.stopListening();
     
 }
 
@@ -253,7 +257,7 @@ void loop() {
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+       // Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
@@ -296,9 +300,9 @@ void loop() {
         mpu.dmpGetQuaternion(&q, fifoBuffer);
         mpu.dmpGetGravity(&gravity, &q);
         mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-        data.yaw = ypr[0] * 180/M_PI;
-        data.pitch = ypr[1] * 180/M_PI;
-        data.roll =ypr[2] * 180/M_PI;
+        data2.yaw = ypr[0] * 180/M_PI;
+        data2.pitch = ypr[1] * 180/M_PI;
+        data2.roll =ypr[2] * 180/M_PI;
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
             // display Euler angles in degrees
             Serial.print("ypr\t");
@@ -368,20 +372,20 @@ void loop() {
     //************************************************************** 
     radio.openWritingPipe(pipes[0]);
     radio.writeFast(&data,sizeof(data));
-
-    
+    radio.openWritingPipe(pipes[1]);
+    radio.writeFast(&data2,sizeof(data2));
     //**************************************************************
     //****                python display loop                   ****
     //************************************************************** 
     #ifdef PYTHON_READ
-    Serial.print(data.lat); Serial.print("\t");
-    Serial.print(data.lon); Serial.print("\t");
-    Serial.print(data.ax); Serial.print("\t");
-    Serial.print(data.ay); Serial.print("\t");
-    Serial.print(data.az); Serial.print("\t");
-    Serial.print(data.yaw); Serial.print("\t");
-    Serial.print(data.pitch); Serial.print("\t");
-    Serial.print(data.roll); Serial.println("\t");
+    Serial.print(data.lat); Serial.print(",");
+    Serial.print(data.lon); Serial.print(",");
+    Serial.print(data.ax); Serial.print(",");
+    Serial.print(data.ay); Serial.print(",");
+    Serial.print(data.az); Serial.print(",");
+    Serial.print(data2.roll); Serial.print(",");
+    Serial.print(data2.pitch); Serial.print(",");
+    Serial.println(data2.yaw);
     #endif
 }
 
