@@ -13,26 +13,29 @@ connectScreen.pack(pady = 100, padx = 100)
 
 ports = list(serial.tools.list_ports.comports())
 def connect():
-    PortsLab.forget()
-    portlist.forget()
-    connectBut.forget()
+    f= open('record data.csv','w')
     print  portpick.get()
     for p in ports:
         if(str(portpick.get()) == str(p)):
             connectionport = str(p.device)
-    ser = serial.Serial(connectionport,115200)
+    ser = serial.Serial(connectionport,9600)
     while True:
         line =  ser.readline()
         words = string.split(line, "\t")
-        lat   = words[0]
-        lon   = words[1]
-        ax    = words[2]
-        ay    = words[3]
-        az    = words[4]
-        roll  = words[5]
-        pitch = words[6]
-        yaw   = words[7]
-        print line
+        try:
+            lat   = words[0]
+            lon   = words[1]
+            ax    = words[2]
+            ay    = words[3]
+            az    = words[4]
+            roll  = words[5]
+            pitch = words[6]
+            yaw   = words[7]
+            writeline =  str(lat) + "\t" + str(lon) + "\t" + str(ax) + "\t" +str(ay) + "\t" +str(az) + "\t" +str(roll) + "\t" +str(pitch) + "\t" +str(yaw) 
+            print writeline
+            f.write(writeline + "\n")
+        except:
+            print 'error'
        
 
 

@@ -205,7 +205,6 @@ void setup() {
     //**************************************************************
   radio.begin();                           // Setup and configure rf radio
   radio.setChannel(1);
-  radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_2MBPS);
   radio.setAutoAck(1);                     // Ensure autoACK is enabled
   radio.setRetries(2,15);                  // Optionally, increase the delay between retries & # of retries
@@ -252,7 +251,6 @@ void loop() {
 
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-
     // check for overflow (this should never happen unless our code is too inefficient)
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
@@ -266,7 +264,7 @@ void loop() {
 
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
-        
+       
         // track FIFO count here in case there is > 1 packet available
         // (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize;
@@ -378,13 +376,13 @@ void loop() {
     //****                python display loop                   ****
     //************************************************************** 
     #ifdef PYTHON_READ
-    Serial.print(data.lat); Serial.print(",");
-    Serial.print(data.lon); Serial.print(",");
-    Serial.print(data.ax); Serial.print(",");
-    Serial.print(data.ay); Serial.print(",");
-    Serial.print(data.az); Serial.print(",");
-    Serial.print(data2.roll); Serial.print(",");
-    Serial.print(data2.pitch); Serial.print(",");
+    Serial.print(data.lat); Serial.print("\t");
+    Serial.print(data.lon); Serial.print("\t");
+    Serial.print(data.ax); Serial.print("\t");
+    Serial.print(data.ay); Serial.print("\t");
+    Serial.print(data.az); Serial.print("\t");
+    Serial.print(data2.roll); Serial.print("\t");
+    Serial.print(data2.pitch); Serial.print("\t");
     Serial.println(data2.yaw);
     #endif
 }

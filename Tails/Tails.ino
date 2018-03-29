@@ -20,7 +20,7 @@ struct data2 data2;
 int i = 0;
 void setup(void) {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   radio.begin();                           // Setup and configure rf radio
   radio.setChannel(1);
