@@ -75,10 +75,7 @@ void dmpDataReady() {
 //**************************************************************
 //****                       GPS declaration                ****
 //**************************************************************
-#include <SoftwareSerial.h>
 
-// Connect the GPS RX/TX to arduino pins 10 and 9
-SoftwareSerial sserial = SoftwareSerial(10,9);
 
 const unsigned char UBX_HEADER[] = { 0xB5, 0x62 };
 
@@ -106,7 +103,7 @@ const uint64_t pipes[2] = { 0xABCDABCD71LL, 0x544d52687CLL };
 
 
 struct data{
-  float lat,lon;
+  long lat,lon;
   int ax,ay,az;
 };
 
@@ -199,7 +196,7 @@ void setup() {
     //**************************************************************
     //****                       GPS setup                      ****
     //**************************************************************
-    sserial.begin(9600);
+      Serial1.begin(115200);
     //**************************************************************
     //****                       RF24 setup                     ****
     //**************************************************************
@@ -255,7 +252,7 @@ void loop() {
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-       // Serial.println(F("FIFO overflow!"));
+        Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
@@ -281,6 +278,7 @@ void loop() {
             Serial.print("\t");
             Serial.println(q.z);
         #endif
+
 
         #ifdef OUTPUT_READABLE_EULER
             // display Euler angles in degrees
@@ -308,7 +306,7 @@ void loop() {
             Serial.print("\t");
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
+            Serial.print(ypr[2] * 180/M_PI);
         #endif
 
         mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -353,11 +351,11 @@ void loop() {
     //****                       GPS loop                       ****
     //************************************************************** 
     if ( processGPS() ) {
-     data.lat = posllh.lat/10000000.0f;
-     data.lon = posllh.lon/10000000.0f;
+     data.lat = posllh.lat;
+     data.lon = posllh.lon;
     #ifdef PRINT_GPS
     //Serial.print("iTOW:");      Serial.print(posllh.iTOW);
-    Serial.print(" lat/lon: "); Serial.print(posllh.lat/10000000.0f); Serial.print(","); Serial.print(posllh.lon/10000000.0f);
+    Serial.print(" lat/lon: "); Serial.print(posllh.lat); Serial.print(","); Serial.print(posllh.lon);
     //Serial.print(" height: ");  Serial.print(posllh.height/1000.0f);
     //Serial.print(" hMSL: ");    Serial.print(posllh.hMSL/1000.0f);
    // Serial.print(" hAcc: ");    Serial.print(posllh.hAcc/1000.0f);
@@ -376,6 +374,8 @@ void loop() {
     //****                python display loop                   ****
     //************************************************************** 
     #ifdef PYTHON_READ
+    data.lat = posllh.lat;
+    data.lon = posllh.lon;
     Serial.print(data.lat); Serial.print("\t");
     Serial.print(data.lon); Serial.print("\t");
     Serial.print(data.ax); Serial.print("\t");
@@ -402,8 +402,8 @@ bool processGPS() {
   static int fpos = 0;
   static unsigned char checksum[2];
   const int payloadSize = sizeof(NAV_POSLLH);
-  while ( sserial.available() ) {
-    byte c = sserial.read();
+  while ( Serial1.available() ) {
+    byte c = Serial1.read();
     if ( fpos < 2 ) {
       if ( c == UBX_HEADER[fpos] )
         fpos++;
